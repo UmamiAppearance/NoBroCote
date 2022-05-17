@@ -1,7 +1,9 @@
-import { Server } from "./runner.js";
+import { PuppeteerInstance } from "./server.js";
 
 class Test {
     constructor() {
+        this.puppeteerInstance = new PuppeteerInstance();
+        
         this.results = {
             tests: 0,
             errors: 0,
@@ -51,18 +53,18 @@ class Test {
         this.results.errorMessages[unit] = errObj;
     }
 
-    run() {
-        const fn = (instance) => {
+    async run() {
+        const tests = () => {
             for (const name in this.units) {
-                console.log(name);
-                instance.results.tests ++;
-                instance.units[name]();
+                this.results.tests ++;
+                this.units[name]();
             }
-            console.log(instance.results);
-            return instance.results;
+
+            return this.results;
         };
-        Server(fn, this);
-        //fn(this);
+
+        const exitCode = await this.puppeteerInstance.run(tests);
+        process.exit(exitCode);
     }
 }
 

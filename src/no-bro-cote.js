@@ -53,19 +53,27 @@ class Test {
     }
 
     async puppeteerInstance(tests) {
-        console.log("- running tests:");
+        console.log("Starting tests:");
+        
+        console.log("- Launching Puppeteer ...");
         const browser = await puppeteer.launch();
         await browser.createIncognitoBrowserContext({ dumpio: true });
         
+        console.log("- Creating Barebone HTML page ...");
         const page = await browser.newPage();
         page.setContent("<!DOCTYPE html><html><body></body></html>");
-        console.log("    + running test functions");
+
+        console.log("- Load Test Functions to HTML Page ...");
         await page.exposeFunction("tests", () => tests());
+
+        console.log("- Running Tests");        
         const result = await page.evaluate(() => window.tests());
+        console.log("- All Tests done");
+
+        console.log("- Stopping Puppeteer");
         await browser.close();
 
-        console.log("- finished tests\n- shutting down test server");
-        console.log("-------\nresults");
+        console.log("\n_______\nresults");
 
         if (!result.errors) delete result.errorMessages;
         console.log(JSON.stringify(result, null, 4));
@@ -73,7 +81,7 @@ class Test {
             console.error(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`);
             return 1;
         }
-        console.log("Everything seems to work fine.");
+        console.log("\nEverything seems to work fine.");
         return 0;
     }
 
@@ -81,8 +89,10 @@ class Test {
 
         const tests = () => {
             for (const name in this.units) {
+                console.log(`  + Testing Unit: '${name}'` );
                 this.results.tests ++;
                 this.units[name]();
+                console.log("  + done");
             }
 
             return this.results;

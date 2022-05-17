@@ -2,10 +2,18 @@
   "name": "no-bro-cote",
   "version": "0.1.0",
   "description": "Node Browser Code Tests. Run tests on your JavaScript code for the browser.",
-  "main": "index.js",
+  "main": "no-bro-cote.cjs",
+  "module": "src/template.js",
   "type": "module",
+  "env": {
+    "node": true,
+    "commonjs": true,
+    "es6": true
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ./src/",
+    "build-cjs": "rollup src/template.js --file cjs/no-bro-cote.cjs --format cjs"
   },
   "repository": {
     "type": "git",
@@ -27,6 +35,7 @@
     "puppeteer": "^14.1.0"
   },
   "devDependencies": {
-    "eslint": "^8.15.0"
+    "eslint": "^8.15.0",
+    "rollup": "^2.73.0"
   }
 }

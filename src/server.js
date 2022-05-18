@@ -74,7 +74,8 @@ class PuppeteerInstance {
             document.head.append(scriptTag);
         }, script);
         
-        
+        await page.waitForFunction("typeof window.test !== 'undefined'");
+
         console.log("    + running test functions");
         const result = await page.evaluate(async () => await window.test.run());
         await browser.close();

@@ -1,7 +1,7 @@
-import puppeteer from "puppeteer";
-
 class Test {
-    constructor() {
+    constructor(fileName) {
+
+        this.fileName = fileName;
         
         this.results = {
             tests: 0,
@@ -10,7 +10,10 @@ class Test {
         };
 
         this.units = new Object();
+
+        this.initialize = typeof window === "undefined";
     }
+
 
     assert(result, expect, unit="main", input=null) {
         if (result !== expect) {
@@ -19,6 +22,9 @@ class Test {
     }
 
     makeUnit(name, expect, fn, ...fnArgs) {
+        if (this.initialize) {
+            return;
+        }
         
         if (name in this.units) {
             throw new Error(`Unit ${name} already exists.`);
@@ -31,6 +37,7 @@ class Test {
             try {
                 result = fn(...fnArgs);
             } catch(err) {
+                console.log("err", err);
                 this.makeError(inputStr, err.message, expect, name);
             }
 
@@ -41,6 +48,7 @@ class Test {
     makeError(input, output, expected, unit) {
         
         this.results.errors ++;
+        console.log("error", output);
 
         const errObj = {
             input: input,
@@ -52,59 +60,53 @@ class Test {
         this.results.errorMessages[unit] = errObj;
     }
 
-    async puppeteerInstance(tests) {
-        console.log("Starting tests:");
-        
-        console.log("- Launching Puppeteer ...");
-        const browser = await puppeteer.launch();
-        await browser.createIncognitoBrowserContext({ dumpio: true });
-        
-        console.log("- Creating Barebone HTML page ...");
-        const page = await browser.newPage();
-        page.setContent("<!DOCTYPE html><html><body></body></html>");
-
-        console.log("- Load Test Functions to HTML Page ...");
-        await page.exposeFunction("tests", () => tests());
-
-        console.log("- Running Tests");        
-        const result = await page.evaluate(() => window.tests());
-        console.log("- All Tests done");
-
-        console.log("- Stopping Puppeteer");
-        await browser.close();
-
-        console.log("\n_______\nresults");
-
-        if (!result.errors) delete result.errorMessages;
-        console.log(JSON.stringify(result, null, 4));
-        if (result.errors) {
-            console.error(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`);
-            return 1;
+    async init() {
+        if (!this.initialize) {
+            return;
         }
-        console.log("\nEverything seems to work fine.");
-        return 0;
+        const server = await import("../src/server.js");
+        this.puppeteerInstance = new server.PuppeteerInstance();
     }
 
-    async run(exitProcess=true) {
+    async getCallerContent() {
+        // import libraries
+        const url = await import("url"); 
+        const fs = await import("fs");
 
-        const tests = () => {
-            for (const name in this.units) {
-                console.log(`  + Testing Unit: '${name}'` );
-                this.results.tests ++;
-                this.units[name]();
-                console.log("  + done");
-            }
+        // get path of script
+        const filePath = url.fileURLToPath(this.fileName);
 
-            return this.results;
-        };
-
-        const exitCode = await this.puppeteerInstance(tests);
+        // get content
+        let content = fs.readFileSync(filePath).toString();
         
-        if (exitProcess) {
+        content = content
+            .replace("../src/no-bro-cote.js", "./src/no-bro-cote.js")
+            .replace("await test.run();", "window.test = test");
+
+        return content;
+
+    }
+
+    async run() {
+        if (this.initialize) {
+
+            const content = await this.getCallerContent();
+            
+            const exitCode = await this.puppeteerInstance.run(content);
             process.exit(exitCode);
         }
+        
+        else {
 
-        return exitCode;
+            for (const name in this.units) {
+                console.log(`testing unit ${name}`);
+                this.results.tests ++;
+                this.units[name]();
+            }
+
+            console.log(this.results);
+            return this.results;
+        }
     }
 }
 

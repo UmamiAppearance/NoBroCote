@@ -61,9 +61,13 @@ class HTMLPageServer {
 
         console.log("- running tests:");
         const browser = await puppeteer.launch();
-        await browser.createIncognitoBrowserContext({ dumpio: true });
+        await browser.createIncognitoBrowserContext();
         
         const page = await browser.newPage();
+        page.on("console", msg => {
+            msg._args.forEach((arg, i) => console.log(`      > ${i}: ${arg}`));
+        });
+
         await page.goto(`http://127.0.0.1:${this.port}/`);
         
         console.log("    + appending test scripts");

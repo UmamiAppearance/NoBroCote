@@ -29,16 +29,16 @@ class Test {
 
         this.units[name] = async () => {
             let result;
-            const inputStr = `${fn.name} -> ( ${fnArgs.join(", ")} )`;
+            const inputStr = `Function: '${fn.name ? fn.name : "anonymous"}', Arguments: ${fnArgs.length ? fnArgs.join(", ") : "none"}`;
             
             try {
                 result = await fn(...fnArgs);
             } catch(err) {
-                console.log("err", err);
-                this.makeError(inputStr, err.message, expect, name);
+                const exception = `${err.name} happened, while running ${name}: '${err.message}'`;
+                this.makeError(inputStr, exception, expect, name);
             }
 
-            this.assert(result, expect, name, inputStr);
+            if (result) this.assert(result, expect, name, inputStr);
         };
     }
 

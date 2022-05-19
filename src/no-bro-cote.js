@@ -22,9 +22,6 @@ class Test {
     }
 
     makeUnit(name, expect, fn, ...fnArgs) {
-        if (this.initialize) {
-            return;
-        }
         
         if (name in this.units) {
             throw new Error(`Unit ${name} already exists.`);

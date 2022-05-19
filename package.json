@@ -2,7 +2,6 @@
   "name": "no-bro-cote",
   "version": "0.1.0",
   "description": "Node Browser Code Tests. Run tests on your JavaScript code for the browser.",
-  "main": "./cjs/no-bro-cote.cjs",
   "module": "./src/no-bro-cote.js",
   "type": "module",
   "env": {
@@ -35,7 +34,6 @@
     "puppeteer": "^14.1.0"
   },
   "devDependencies": {
-    "eslint": "^8.15.0",
-    "rollup": "^2.73.0"
+    "eslint": "^8.15.0"
   }
 }

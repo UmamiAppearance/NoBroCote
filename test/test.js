@@ -5,9 +5,20 @@ const test = new Test(import.meta.url);
 test.makeUnit(
     "test",
     "hello",
-    () => "hello"
+    () => {
+        document.body.textContent = "hello";
+        return document.body.textContent;
+    }
 );
 
-await test.init();
+test.makeUnit(
+    "test2",
+    "hello",
+    async() => {
+        document.body.textContent = "hello";
+        return document.body.textContent;
+    }
+);
 
-await test.run();
+
+await test.init(test);

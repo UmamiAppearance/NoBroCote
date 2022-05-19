@@ -2,7 +2,7 @@ import { createServer } from "http";
 import puppeteer from "puppeteer";
 import { readFile } from "fs";
 
-class PuppeteerInstance {
+class HTMLPageServer {
     constructor() {
         this.port = 9999;
         this.tests = null;
@@ -66,8 +66,8 @@ class PuppeteerInstance {
         const page = await browser.newPage();
         await page.goto(`http://127.0.0.1:${this.port}/`);
         
-        console.log("    + appending test functions");
-        await page.evaluate((script) => {
+        console.log("    + appending test scripts");
+        await page.evaluate(script => {
             const scriptTag = document.createElement("script");
             scriptTag.type = "module";
             scriptTag.innerHTML = script;
@@ -95,4 +95,4 @@ class PuppeteerInstance {
     }
 }
 
-export { PuppeteerInstance };
+export { HTMLPageServer };

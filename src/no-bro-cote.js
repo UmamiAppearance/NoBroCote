@@ -60,12 +60,21 @@ class Test {
         this.results.errorMessages[unit] = errObj;
     }
 
-    async init() {
+    async init(instance) {
+        this.instance = instance;
+
         if (!this.initialize) {
             return;
         }
+        
         const server = await import("../src/server.js");
-        this.puppeteerInstance = new server.PuppeteerInstance();
+        this.server = new server.HTMLPageServer();
+        
+        const content = await this.getCallerContent();
+            
+        const exitCode = await this.server.run(content);
+        
+        process.exit(exitCode);
     }
 
     async getCallerContent() {
@@ -79,34 +88,33 @@ class Test {
         // get content
         let content = fs.readFileSync(filePath).toString();
         
-        content = content
-            .replace("../src/no-bro-cote.js", "./src/no-bro-cote.js")
-            .replace("await test.run();", "window.test = test");
+        content = content.replace("../src/no-bro-cote.js", "./src/no-bro-cote.js");
+        content += "\nwindow.test = test;";
 
         return content;
 
     }
 
     async run() {
-        if (this.initialize) {
-
-            const content = await this.getCallerContent();
-            
-            const exitCode = await this.puppeteerInstance.run(content);
-            process.exit(exitCode);
-        }
+        const unitNames = Object.keys(this.units);
         
-        else {
-
-            for (const name in this.units) {
-                console.log(`testing unit ${name}`);
+        const testGroup = async () => {
+            const unitName = unitNames.shift();
+            
+            if (unitName) {
                 this.results.tests ++;
-                this.units[name]();
+                const unitFN = this.units[unitName];
+                await unitFN();
+                await testGroup();
             }
 
-            console.log(this.results);
-            return this.results;
-        }
+            return true;
+
+        };
+
+        await testGroup();
+
+        return this.results;
     }
 }
 

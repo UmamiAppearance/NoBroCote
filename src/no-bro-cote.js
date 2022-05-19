@@ -30,12 +30,12 @@ class Test {
             throw new Error(`Unit ${name} already exists.`);
         }
 
-        this.units[name] = () => {
+        this.units[name] = async () => {
             let result;
             const inputStr = `${fn.name} -> ( ${fnArgs.join(", ")} )`;
             
             try {
-                result = fn(...fnArgs);
+                result = await fn(...fnArgs);
             } catch(err) {
                 console.log("err", err);
                 this.makeError(inputStr, err.message, expect, name);

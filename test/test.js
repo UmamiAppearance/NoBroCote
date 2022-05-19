@@ -14,11 +14,11 @@ test.makeUnit(
 test.makeUnit(
     "test2",
     "hello",
-    async() => {
+    async () => {
         document.body.textContent = "hello";
         return document.body.textContent;
     }
 );
 
 
-await test.init(test);
+await test.init();

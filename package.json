@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/UmamiAppearance/NoBroCote#readme",
   "dependencies": {
+    "browser-sha-obj": "^0.1.1",
     "puppeteer": "^14.1.0"
   },
   "devDependencies": {

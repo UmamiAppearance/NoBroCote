@@ -57,7 +57,7 @@ class Test {
         this.results.errorMessages[unit] = errObj;
     }
 
-    async init(instance) {
+    async init(instance, selfTest=false) {
         this.instance = instance;
 
         if (!this.initialize) {
@@ -67,25 +67,36 @@ class Test {
         const server = await import("../src/server.js");
         this.server = new server.HTMLPageServer();
         
-        const content = await this.getCallerContent();
+        const content = await this.getCallerContent(selfTest);
             
         const exitCode = await this.server.run(content);
         
         process.exit(exitCode);
     }
 
-    async getCallerContent() {
+    async getCallerContent(selfTest) {
         // import libraries
-        const url = await import("url"); 
         const fs = await import("fs");
+        const url = await import("url"); 
+        const path = await import("path");
 
         // get path of script
         const filePath = url.fileURLToPath(this.fileName);
 
+        // get server root
+        const classPath = url.fileURLToPath(import.meta.url);
+        const serverRoot = path.dirname(classPath);
+
+        console.log(classPath);
+        console.log(serverRoot);
+
+
         // get content
         let content = fs.readFileSync(filePath).toString();
         
-        content = content.replace("../src/no-bro-cote.js", "./src/no-bro-cote.js");
+        if (selfTest) {
+            content = content.replace("../src/no-bro-cote.js", "./src/no-bro-cote.js");
+        }
         content += "\nwindow.test = test;";
 
         return content;

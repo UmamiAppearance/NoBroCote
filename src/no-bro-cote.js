@@ -9,11 +9,28 @@ class Test {
             errorMessages: new Object()
         };
 
-        this.units = new Object();
-
         this.initialize = typeof window === "undefined";
+        if (this.initialize) {
+            this.rootDir = process.cwd();
+        }
+        
+        this.imports = new Array();
+        this.units = new Object();
     }
 
+    addImport(imports) {
+        if (!this.initialize) {
+            return;
+        }
+
+        if (typeof imports === "string") {
+            this.imports.push(imports);
+        } else if (Array.isArray(imports)) {
+            this.imports.push(...imports);
+        } else {
+            throw new TypeError("Imports must be a string or an array of strings.")
+        }
+    }
 
     assert(result, expect, unit="main", input=null) {
         if (result !== expect) {
@@ -57,9 +74,7 @@ class Test {
         this.results.errorMessages[unit] = errObj;
     }
 
-    async init(instance, selfTest=false) {
-        this.instance = instance;
-
+    async init(selfTest=false) {
         if (!this.initialize) {
             return;
         }
@@ -97,7 +112,8 @@ class Test {
         if (selfTest) {
             content = content.replace("../src/no-bro-cote.js", "./src/no-bro-cote.js");
         }
-        content += "\nwindow.test = test;";
+        const imports = this.imports.join("\n");
+        content = `\n${imports}\n${content}\nwindow.test = test;\n`;
 
         return content;
 

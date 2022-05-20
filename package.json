@@ -2,7 +2,7 @@
   "name": "no-bro-cote",
   "version": "0.1.0",
   "description": "Node Browser Code Tests. Run tests on your JavaScript code for the browser.",
-  "module": "./src/no-bro-cote.js",
+  "main": "./src/no-bro-cote.js",
   "type": "module",
   "env": {
     "node": true,
@@ -11,8 +11,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint ./src/",
-    "build-cjs": "rollup ./src/no-bro-cote.js --file ./cjs/no-bro-cote.cjs --format cjs"
+    "lint": "eslint ./src/"
   },
   "repository": {
     "type": "git",

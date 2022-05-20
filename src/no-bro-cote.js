@@ -29,12 +29,15 @@ class Test {
         } else if (Array.isArray(imports)) {
             this.imports.push(...imports);
         } else {
-            throw new TypeError("Imports must be a string or an array of strings.")
+            throw new TypeError("Imports must be a string or an array of strings.");
         }
     }
 
     assert(result, expect, unit="main", input=null) {
-        if (result !== expect) {
+        if (expect.match(/^!\|/) && result === expect.replace(/^!\|/, "")) {
+            console.log(expect.replace(/^!\|/, ""));
+            this.makeError(input, result, expect, unit);
+        } else if (result !== expect) {
             this.makeError(input, result, expect, unit);
         }
     }
@@ -53,7 +56,9 @@ class Test {
                 result = await fn(...fnArgs);
             } catch(err) {
                 const exception = `${err.name} happened, while running ${name}: '${err.message}'`;
-                this.makeError(inputStr, exception, expect, name);
+                if (!expect.match(/^e|/)) {
+                    this.makeError(inputStr, exception, expect, name);
+                }
             }
 
             if (result) this.assert(result, expect, name, inputStr);
@@ -75,12 +80,12 @@ class Test {
         this.results.errorMessages[unit] = errObj;
     }
 
-    async init(selfTest=false) {
+    async init() {
         if (!this.initialize) {
             return;
         }
         let content, relClassPath;
-        [content, relClassPath] = await this.compileServerVars(selfTest);
+        [content, relClassPath] = await this.compileServerVars();
 
         const server = await import("../src/server.js");
         this.server = new server.HTMLPageServer(relClassPath);
@@ -90,7 +95,7 @@ class Test {
         process.exit(exitCode);
     }
 
-    async compileServerVars(selfTest) {
+    async compileServerVars() {
         // import libraries
         const fs = await import("fs");
         const url = await import("url");

@@ -16,7 +16,7 @@ test.makeUnit(
 
 test.makeUnit(
     "failedTestExample",
-    "false",
+    "!|false",
     async () => {
         document.body.textContent = "true";
         return document.body.textContent;
@@ -25,7 +25,7 @@ test.makeUnit(
 
 test.makeUnit(
     "exceptionExample",
-    "False",
+    "e|",
     () => {
         console.log(False);
         return "False";

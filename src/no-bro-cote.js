@@ -12,6 +12,7 @@ class Test {
         this.initialize = typeof window === "undefined";
         if (this.initialize) {
             this.rootDir = process.cwd();
+            console.log(this.rootDir);
         }
         
         this.imports = new Array();
@@ -78,44 +79,62 @@ class Test {
         if (!this.initialize) {
             return;
         }
-        
+        let content, relClassPath;
+        [content, relClassPath] = await this.compileServerVars(selfTest);
+
         const server = await import("../src/server.js");
-        this.server = new server.HTMLPageServer();
+        this.server = new server.HTMLPageServer(relClassPath);
         
-        const content = await this.getCallerContent(selfTest);
-            
-        const exitCode = await this.server.run(content);
+        const exitCode = await this.server.run(content, relClassPath);
         
         process.exit(exitCode);
     }
 
-    async getCallerContent(selfTest) {
+    async compileServerVars(selfTest) {
         // import libraries
         const fs = await import("fs");
-        const url = await import("url"); 
-        const path = await import("path");
+        const url = await import("url");
 
         // get path of script
-        const filePath = url.fileURLToPath(this.fileName);
+        const instanceFilePath = url.fileURLToPath(this.fileName);
 
-        // get server root
-        const classPath = url.fileURLToPath(import.meta.url);
-        const serverRoot = path.dirname(classPath);
+        // get path of this class
+        const classFilePath = url.fileURLToPath(import.meta.url);
+        const classFileName = classFilePath.split("/").at(-1);
 
-        console.log(classPath);
-        console.log(serverRoot);
+        // get path relative to root
+        const relClassPath = classFilePath.replace(this.rootDir, "");
+        if (relClassPath.length === classFilePath) {
+            throw new Error(`Unable to set relative import path. Is NoBroCote a subfolder of root directory '${this.rootDir}'?`);
+        }
+        const relInstancePath = instanceFilePath.replace(this.rootDir, "");
+        if (relInstancePath.length === instanceFilePath) {
+            throw new Error(`Unable to set relative import path. Is your test instance a subfolder of root directory '${this.rootDir}'?`);
+        }
 
+        // count the tree of sub folders to root
+        // (minus leading slash, minus filename)
+        const stepsToRoot = relInstancePath.split("/").length - 2;
+        let leadingDots = (stepsToRoot) ? "../".repeat(stepsToRoot).slice(0,-1) : ".";
 
         // get content
-        let content = fs.readFileSync(filePath).toString();
+        let content = fs.readFileSync(instanceFilePath).toString();
         
-        if (selfTest) {
-            content = content.replace("../src/no-bro-cote.js", "./src/no-bro-cote.js");
-        }
+        // replace import statement ([node] or relative [file])
+        const regexpNode = new RegExp("^import.*no-bro-cote.*$", "m");
+        const regexpFile = new RegExp(`^import.*${classFileName}.*$`, "m");
+        const importStatement = `import { Test } from "${leadingDots}${relClassPath}";`;
+        content = content
+            .replace(regexpNode, importStatement)
+            .replace(regexpFile, importStatement);
+
+
+        console.log(content);
+
         const imports = this.imports.join("\n");
         content = `\n${imports}\n${content}\nwindow.test = test;\n`;
 
-        return content;
+        return [content, relClassPath];
 
     }
 

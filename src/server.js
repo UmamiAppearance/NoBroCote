@@ -3,9 +3,10 @@ import puppeteer from "puppeteer";
 import { readFile } from "fs";
 
 class HTMLPageServer {
-    constructor() {
+    constructor(relClassPath) {
         this.port = 9999;
         this.tests = null;
+        this.relClassPath = relClassPath;
 
         this.mimeTypes = {
             html: "text/html",
@@ -18,7 +19,7 @@ class HTMLPageServer {
             
             let filePath;
             if (request.url === "/") {
-                filePath = "./src/barebone.html";
+                filePath = `.${this.relClassPath}`;
                 console.log("    + opening html test page");
             } else {
                 console.log(`    + importing ${request.url.split("/")[2]}`);

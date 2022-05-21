@@ -166,11 +166,15 @@ class Test {
             const unitName = unitNames.shift();
             
             if (unitName) {
+                const header = `Testing unit: '${unitName}'`; 
+                console.log(`${header}:\n      ${"-".repeat(header.length + 13)}`);
                 this.results.tests ++;
                 const unitFN = this.units[unitName];
                 await unitFN();
                 await testGroup();
             }
+
+
 
             return true;
 

@@ -73,7 +73,7 @@ class HTMLPageServer {
                 return msgArray;
             };
 
-            console.log("    > log from fn: " + (await argJoinFN()).join(" "));
+            console.log("    > log: " + (await argJoinFN()).join(" "));
         });
 
         await page.goto(`http://127.0.0.1:${this.port}/`);
@@ -93,7 +93,7 @@ class HTMLPageServer {
         await browser.close();
         await this.terminateServer();
 
-        console.log("- finished tests\n- shutting down test server");
+        console.log("- all done\n- shutting down test server");
         console.log("-------\nresults");
 
         if (!result.errors) delete result.errorMessages;

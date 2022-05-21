@@ -8,8 +8,6 @@ test.makeUnit(
     "successfulTestExample",
     "true",
     () => {
-        console.log("test1", "test2");
-        console.log("test3");
         document.body.textContent = "true";
         return document.body.textContent;
     }

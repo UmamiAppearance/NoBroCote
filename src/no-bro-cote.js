@@ -139,15 +139,17 @@ class Test {
         // count the tree of sub folders to root
         // (minus leading slash, minus filename)
         const stepsToRoot = relInstancePath.split("/").length - 2;
-        let leadingDots = (stepsToRoot) ? "../".repeat(stepsToRoot).slice(0,-1) : ".";
+        let dirDots = (stepsToRoot) ? "../".repeat(stepsToRoot).slice(0,-1) : ".";
 
         // get content
         let content = fs.readFileSync(instanceFilePath).toString();
         
         // replace import statement ([node] or relative [file])
+        // TODO: the replacement of the relative path is most
+        // likely redundant -> confirm that
         const regexpNode = new RegExp("^import.*no-bro-cote.*$", "m");
         const regexpFile = new RegExp(`^import.*${classFileName}.*$`, "m");
-        const importStatement = `import { Test } from "${leadingDots}${relClassPath}";`;
+        const importStatement = `import { Test } from "${dirDots}${relClassPath}";`;
         content = content
             .replace(regexpNode, importStatement)
             .replace(regexpFile, importStatement);
@@ -163,25 +165,20 @@ class Test {
         const unitNames = Object.keys(this.units);
         
         const testGroup = async () => {
-            const unitName = unitNames.shift();
             
+            const unitName = unitNames.shift();            
             if (unitName) {
-                const header = `Testing unit: '${unitName}'`; 
-                console.log(`${header}:\n      ${"-".repeat(header.length + 13)}`);
+                const header = `testing unit: '${unitName}'`; 
+                console.log(`${header}:\n      ${"-".repeat(header.length + 5)}`);
                 this.results.tests ++;
                 const unitFN = this.units[unitName];
                 await unitFN();
                 await testGroup();
             }
-
-
-
             return true;
-
         };
-
+        
         await testGroup();
-
         return this.results;
     }
 }

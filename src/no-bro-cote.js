@@ -9,10 +9,20 @@ class Test {
             errorMessages: new Object()
         };
 
+        this.errorList = [
+            "",
+            "EvalError",
+            "InternalError",
+            "RangeError",
+            "ReferenceError",
+            "SyntaxError",
+            "TypeError",
+            "URIError"
+        ];
+
         this.initialize = typeof window === "undefined";
         if (this.initialize) {
             this.rootDir = process.cwd();
-            console.log(this.rootDir);
         }
         
         this.imports = new Array();
@@ -34,9 +44,10 @@ class Test {
     }
 
     assert(result, expect, unit="main", input=null) {
-        if (expect.match(/^!\|/) && result === expect.replace(/^!\|/, "")) {
-            console.log(expect.replace(/^!\|/, ""));
-            this.makeError(input, result, expect, unit);
+        if (expect.match(/^!\|/)) { 
+            if (result === expect.replace(/^!\|/, "")) {
+                this.makeError(input, result, expect, unit);
+            }
         } else if (result !== expect) {
             this.makeError(input, result, expect, unit);
         }
@@ -56,7 +67,17 @@ class Test {
                 result = await fn(...fnArgs);
             } catch(err) {
                 const exception = `${err.name} happened, while running ${name}: '${err.message}'`;
-                if (!expect.match(/^e|/)) {
+                
+                let throwErr = true;
+                
+                if (expect.match(/^e|/)) {
+                    const errType = expect.replace(/^(e\|)/, "");
+                    if (this.errorList.includes(errType)) {
+                        throwErr = false;
+                    }
+                }
+
+                if (throwErr) {
                     this.makeError(inputStr, exception, expect, name);
                 }
             }
@@ -68,8 +89,6 @@ class Test {
     makeError(input, output, expected, unit) {
         
         this.results.errors ++;
-        console.log("error", output);
-
         const errObj = {
             input: input,
             output: output,
@@ -132,9 +151,6 @@ class Test {
         content = content
             .replace(regexpNode, importStatement)
             .replace(regexpFile, importStatement);
-
-
-        console.log(content);
 
         const imports = this.imports.join("\n");
         content = `\n${imports}\n${content}\nwindow.test = test;\n`;

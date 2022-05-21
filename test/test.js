@@ -8,7 +8,6 @@ test.makeUnit(
     "successfulTestExample",
     "true",
     () => {
-        console.log(document.head.innerHTML);
         document.body.textContent = "true";
         return document.body.textContent;
     }
@@ -16,16 +15,16 @@ test.makeUnit(
 
 test.makeUnit(
     "failedTestExample",
-    "!|false",
+    "!|dog",
     async () => {
-        document.body.textContent = "true";
+        document.body.textContent = "cat";
         return document.body.textContent;
     }
 );
 
 test.makeUnit(
     "exceptionExample",
-    "e|",
+    "e|ReferenceError",
     () => {
         console.log(False);
         return "False";

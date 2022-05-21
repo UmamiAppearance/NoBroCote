@@ -20,9 +20,9 @@ class HTMLPageServer {
             let filePath;
             if (request.url === "/") {
                 filePath = `.${this.relClassPath}`;
-                console.log("    + opening html test page");
+                console.log("  + opening html test page");
             } else {
-                console.log(`    + importing ${request.url.split("/")[2]}`);
+                console.log(`  + importing ${request.url.split("/")[2]}`);
                 filePath = `.${request.url}`;
             }
 
@@ -71,7 +71,7 @@ class HTMLPageServer {
 
         await page.goto(`http://127.0.0.1:${this.port}/`);
         
-        console.log("    + appending test scripts");
+        console.log("  + appending test scripts");
         await page.evaluate(script => {
             const scriptTag = document.createElement("script");
             scriptTag.type = "module";
@@ -81,7 +81,7 @@ class HTMLPageServer {
         
         await page.waitForFunction("typeof window.test !== 'undefined'");
 
-        console.log("    + running test functions");
+        console.log("  + running test functions");
         const result = await page.evaluate(async () => await window.test.run());
         await browser.close();
         await this.terminateServer();

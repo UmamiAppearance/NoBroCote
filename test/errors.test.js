@@ -1,21 +1,19 @@
 import { Test } from "../src/no-bro-cote.js";
 
-const test = new Test(import.meta.url);
+const testError = new Test(import.meta.url);
 
-test.addImport("import { CodeJar } from 'https://medv.io/codejar/codejar.js';");
-
-test.makeUnit(
-    "successfulTestExample",
-    "true",
+testError.makeUnit(
+    "defaultExample",
+    "false",
     () => {
         document.body.textContent = "true";
         return document.body.textContent;
     }
 );
 
-test.makeUnit(
-    "convertTypeExample",
-    "==|42",
+testError.makeUnit(
+    "unconvertTypeExample",
+    "42",
     async () => {
         document.body.textContent = "42";
         return Number(document.body.textContent);
@@ -23,31 +21,31 @@ test.makeUnit(
 );
 
 
-test.makeUnit(
+testError.makeUnit(
     "notExample",
     "!|dog",
     () => {
-        document.body.textContent = "cat";
-        return document.body.textContent;
-    }
-);
-
-test.makeUnit(
-    "orExample",
-    "||cat|dog|bird",
-    async () => {
         document.body.textContent = "dog";
         return document.body.textContent;
     }
 );
 
-test.makeUnit(
+testError.makeUnit(
+    "orExample",
+    "||cat|dog|bird",
+    async () => {
+        document.body.textContent = "fish";
+        return document.body.textContent;
+    }
+);
+
+testError.makeUnit(
     "exceptionExample",
-    "e|ReferenceError",
+    "e|TypeError",
     () => {
         console.log(False);
         return "False";
     }
 );
 
-await test.init();
+await testError.init(false);

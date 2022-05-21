@@ -86,24 +86,17 @@ class HTMLPageServer {
             document.head.append(scriptTag);
         }, script);
         
-        await page.waitForFunction("typeof window.test !== 'undefined'");
-
+        console.log("start waitung");
+        await page.waitForFunction("typeof window.testError !== 'undefined'");
+        console.log("waitung fone");
         console.log("  + running test functions");
-        const result = await page.evaluate(async () => await window.test.run());
+        const result = await page.evaluate(async () => await window.testError.run());
         await browser.close();
         await this.terminateServer();
 
         console.log("- all done\n- shutting down test server");
-        console.log("-------\nresults");
-
-        if (!result.errors) delete result.errorMessages;
-        console.log(JSON.stringify(result, null, 4));
-        if (result.errors) {
-            console.error(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`);
-            return 1;
-        }
-        console.log("Everything seems to work fine.");
-        return 0;
+        
+        return result;
     }
 }
 

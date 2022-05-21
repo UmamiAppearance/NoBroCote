@@ -84,7 +84,7 @@ class Test {
                 
                 if (expect.match(/^e|/)) {
                     const errType = expect.replace(/^(e\|)/, "");
-                    if (this.errorList.includes(errType)) {
+                    if (this.errorList.includes(errType) && (errType === "" || err.name === errType)) {
                         throwErr = false;
                     }
                 }
@@ -111,19 +111,41 @@ class Test {
         this.results.errorMessages[unit] = errObj;
     }
 
-    async init() {
+    async init(exit=true) {
         if (!this.initialize) {
             return;
         }
+        
         let content, relClassPath;
         [content, relClassPath] = await this.compileServerVars();
 
         const server = await import("../src/server.js");
         this.server = new server.HTMLPageServer(relClassPath);
+
+        const result = await this.server.run(content, relClassPath);
+        console.log("AM I HERE?");
+
+        let exitCode = 0;
+        if (!result.errors) {
+            delete result.errorMessages;
+        }
+
+        console.log("-------\nresults");
+        console.log(JSON.stringify(result, null, 4));
+
+        if (result.errors) {
+            console.error(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`);
+            exitCode = 1;
+        } 
+        if (exitCode === 0) {
+            console.log("Everything seems to work fine.");
+        }
+        if (exit) {
+            process.exit(exitCode);
+        }
+
+        return result;
         
-        const exitCode = await this.server.run(content, relClassPath);
-        
-        process.exit(exitCode);
     }
 
     async compileServerVars() {
@@ -191,6 +213,8 @@ class Test {
         };
         
         await testGroup();
+
+        console.log("Got results");
         return this.results;
     }
 }

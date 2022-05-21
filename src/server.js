@@ -65,8 +65,15 @@ class HTMLPageServer {
         await browser.createIncognitoBrowserContext();
         
         const page = await browser.newPage();
-        page.on("console", msg => {
-            msg._args.forEach((arg, i) => console.log(`      > ${i}: ${arg}`));
+    
+        page.on("console", async msg => {
+            const argJoinFN = async () => {
+                const msgArray = [];
+                msg._args.forEach(async (arg) => msgArray.push(`${await arg.jsonValue()}`));
+                return msgArray;
+            };
+
+            console.log("    > log from fn: " + (await argJoinFN()).join(" "));
         });
 
         await page.goto(`http://127.0.0.1:${this.port}/`);

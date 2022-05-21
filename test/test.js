@@ -14,10 +14,29 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "failedTestExample",
-    "!|dog",
+    "convertTypeExample",
+    "==|42",
     async () => {
+        document.body.textContent = "42";
+        return Number(document.body.textContent);
+    }
+);
+
+
+test.makeUnit(
+    "notExample",
+    "!|dog",
+    () => {
         document.body.textContent = "cat";
+        return document.body.textContent;
+    }
+);
+
+test.makeUnit(
+    "orExample",
+    "||cat|dog|bird",
+    async () => {
+        document.body.textContent = "dog";
         return document.body.textContent;
     }
 );

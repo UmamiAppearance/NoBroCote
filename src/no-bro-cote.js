@@ -44,12 +44,24 @@ class Test {
     }
 
     assert(result, expect, unit="main", input=null) {
+        const error = () => this.makeError(input, result, expect, unit);
+
+
         if (expect.match(/^!\|/)) { 
-            if (result === expect.replace(/^!\|/, "")) {
-                this.makeError(input, result, expect, unit);
-            }
-        } else if (result !== expect) {
-            this.makeError(input, result, expect, unit);
+            if (result === expect.replace(/^!\|/, "")) error();
+        } 
+        
+        else if (expect.match(/^\|\|/)) {
+            const valid = expect.split("|").slice(2);
+            if (!valid.includes(result)) error();
+        }
+
+        else if (expect.match(/^==\|/)) {
+            if (result != expect.replace(/^==\|/, "")) error();
+        }
+        
+        else if (result !== expect) {
+            error();
         }
     }
 

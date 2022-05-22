@@ -1,8 +1,8 @@
-import { Test } from "../src/no-bro-cote.js";
+import { NoBroCote } from "../src/no-bro-cote.js";
 
-const testError = new Test(import.meta.url);
+const testErrors = new NoBroCote(import.meta.url);
 
-testError.makeUnit(
+testErrors.makeUnit(
     "defaultExample",
     "false",
     () => {
@@ -11,7 +11,7 @@ testError.makeUnit(
     }
 );
 
-testError.makeUnit(
+testErrors.makeUnit(
     "unconvertTypeExample",
     "42",
     async () => {
@@ -21,7 +21,7 @@ testError.makeUnit(
 );
 
 
-testError.makeUnit(
+testErrors.makeUnit(
     "notExample",
     "!|dog",
     () => {
@@ -30,7 +30,7 @@ testError.makeUnit(
     }
 );
 
-testError.makeUnit(
+testErrors.makeUnit(
     "orExample",
     "||cat|dog|bird",
     async () => {
@@ -39,7 +39,7 @@ testError.makeUnit(
     }
 );
 
-testError.makeUnit(
+testErrors.makeUnit(
     "exceptionExample",
     "e|TypeError",
     () => {
@@ -48,4 +48,4 @@ testError.makeUnit(
     }
 );
 
-await testError.init(false);
+await testErrors.init(false);

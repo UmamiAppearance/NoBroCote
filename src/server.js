@@ -86,11 +86,11 @@ class HTMLPageServer {
             document.head.append(scriptTag);
         }, script);
         
-        console.log("start waitung");
-        await page.waitForFunction("typeof window.testError !== 'undefined'");
-        console.log("waitung fone");
+        // wait for test instance to be ready
+        await page.waitForFunction("typeof window.testInstance !== 'undefined'");
+
         console.log("  + running test functions");
-        const result = await page.evaluate(async () => await window.testError.run());
+        const result = await page.evaluate(async () => await window.testInstance.run());
         await browser.close();
         await this.terminateServer();
 

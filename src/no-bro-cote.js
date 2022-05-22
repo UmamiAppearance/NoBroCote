@@ -1,4 +1,4 @@
-class Test {
+class NoBroCote {
     constructor(fileName) {
 
         this.fileName = fileName;
@@ -21,6 +21,7 @@ class Test {
         ];
 
         this.initialize = typeof window === "undefined";
+        
         if (this.initialize) {
             this.rootDir = process.cwd();
         }
@@ -111,7 +112,7 @@ class Test {
         this.results.errorMessages[unit] = errObj;
     }
 
-    async init(exit=true) {
+    async init() {
         if (!this.initialize) {
             return;
         }
@@ -123,7 +124,6 @@ class Test {
         this.server = new server.HTMLPageServer(relClassPath);
 
         const result = await this.server.run(content, relClassPath);
-        console.log("AM I HERE?");
 
         let exitCode = 0;
         if (!result.errors) {
@@ -140,12 +140,8 @@ class Test {
         if (exitCode === 0) {
             console.log("Everything seems to work fine.");
         }
-        if (exit) {
-            process.exit(exitCode);
-        }
-
-        return result;
         
+        process.exit(exitCode);
     }
 
     async compileServerVars() {
@@ -183,13 +179,22 @@ class Test {
         // likely redundant -> confirm that
         const regexpNode = new RegExp("^import.*no-bro-cote.*$", "m");
         const regexpFile = new RegExp(`^import.*${classFileName}.*$`, "m");
-        const importStatement = `import { Test } from "${dirDots}${relClassPath}";`;
+        const importStatement = `import { NoBroCote } from "${dirDots}${relClassPath}";`;
         content = content
             .replace(regexpNode, importStatement)
             .replace(regexpFile, importStatement);
 
+        // find instance variable
+        const varMatch = content.match(/.*(?=\s?=\s?new NoBroCote)/m);
+        if (!varMatch) {
+            throw new Error(`Could not find instance filename in ${relInstancePath}`);
+        }
+
+        const instanceVar = varMatch[0].trim().split(/\s/).at(-1);
+        console.log(instanceVar);
+
         const imports = this.imports.join("\n");
-        content = `\n${imports}\n${content}\nwindow.test = test;\n`;
+        content = `\n${imports}\n${content}\nwindow.testInstance = ${instanceVar};\n`;
 
         return [content, relClassPath];
 
@@ -214,9 +219,8 @@ class Test {
         
         await testGroup();
 
-        console.log("Got results");
         return this.results;
     }
 }
 
-export { Test };
+export { NoBroCote };

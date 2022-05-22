@@ -10,7 +10,7 @@
     "es6": true
   },
   "scripts": {
-    "test": "node test/test.js",
+    "test": "node test/self.test.js",
     "lint": "eslint ./src/"
   },
   "repository": {

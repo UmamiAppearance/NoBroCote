@@ -43,6 +43,7 @@ testSuccess.makeUnit(
     "exceptionExample",
     "e|ReferenceError",
     () => {
+        // eslint-disable-next-line no-undef
         console.log(False);
         return "False";
     }

@@ -1,8 +1,17 @@
+/*
+ * [NoBroCote|HTML Server]{@link https://github.com/UmamiAppearance/NoBroCote}
+ *
+ * @version 0.1.0
+ * @author UmamiAppearance [mail@umamiappearance.eu]
+ * @license GPL-3.0
+ */
+
 import { createServer } from "http";
 import puppeteer from "puppeteer";
 import { readFile } from "fs";
 
-class HTMLPageServer {
+
+class NoBroCoteHTMLServer {
     constructor(relClassPath) {
         this.port = 9999;
         this.tests = null;
@@ -80,10 +89,14 @@ class HTMLPageServer {
         
         console.log("  + appending test scripts");
         await page.evaluate(script => {
+            // append tests to document head as module
             const scriptTag = document.createElement("script");
             scriptTag.type = "module";
             scriptTag.innerHTML = script;
             document.head.append(scriptTag);
+
+            // prepare empty document body
+            document.body.innerHTML = "";
         }, script);
         
         // wait for test instance to be ready
@@ -91,6 +104,7 @@ class HTMLPageServer {
 
         console.log("  + running test functions");
         const result = await page.evaluate(async () => await window.testInstance.run());
+        
         await browser.close();
         await this.terminateServer();
 
@@ -100,4 +114,4 @@ class HTMLPageServer {
     }
 }
 
-export { HTMLPageServer };
+export { NoBroCoteHTMLServer };

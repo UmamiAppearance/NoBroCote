@@ -12,7 +12,7 @@ testErrors.makeUnit(
 );
 
 testErrors.makeUnit(
-    "unconvertTypeExample",
+    "noConvertTypeExample",
     "42",
     async () => {
         document.body.textContent = "42";
@@ -43,6 +43,7 @@ testErrors.makeUnit(
     "exceptionExample",
     "e|TypeError",
     () => {
+        // eslint-disable-next-line no-undef
         console.log(False);
         return "False";
     }

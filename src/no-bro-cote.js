@@ -1,14 +1,47 @@
+/*
+ * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
+ *
+ * @version 0.1.0
+ * @author UmamiAppearance [mail@umamiappearance.eu]
+ * @license GPL-3.0
+ */
+
+
+// Imports are done asynchronously and on the fly.
+// Otherwise the imports would probably look like
+// so:
+// -------------------------------------------------- //
+// import { NoBroCoteHTMLServer } from "./server.js";
+// import { readFileSync } from "fs";
+// import { fileURLToPath } from "url";
+// -------------------------------------------------- //
+
+
+/**
+ * Main class. Instances of this class are hybrids
+ * of prototypes for creating unit tests and are
+ * also working as HTM test runners.
+ */
 class NoBroCote {
+
+    /**
+     * Create a new NoBroCode instance. 
+     * Kindly pass 'import.meta.url'
+     * @param {string} fileName - import.meta.url
+     */
     constructor(fileName) {
 
+        // name of the instance file
         this.fileName = fileName;
         
+        // results obj for the test runner
         this.results = {
             tests: 0,
             errors: 0,
             errorMessages: new Object()
         };
 
+        // possible error types (can be extended)
         this.errorList = [
             "",
             "EvalError",
@@ -20,16 +53,24 @@ class NoBroCote {
             "URIError"
         ];
 
+        // true if first called by node, false during tests 
         this.initialize = typeof window === "undefined";
         
+        // store project root for initialization
         if (this.initialize) {
             this.rootDir = process.cwd();
         }
         
+        // prepare imports and unit array and object
         this.imports = new Array();
         this.units = new Object();
     }
 
+
+    /**
+     * Imports for the test runner html page
+     * @param {(string|string[])} imports 
+     */
     addImport(imports) {
         if (!this.initialize) {
             return;
@@ -44,9 +85,14 @@ class NoBroCote {
         }
     }
 
-    assert(result, expect, unit="main", input=null) {
-        const error = () => this.makeError(input, result, expect, unit);
 
+    /**
+     * Helper function. Compares expected and
+     * actual results. Handles operators for
+     * the expect value. 
+     */
+    #assert(result, expect, unit, input) {
+        const error = () => this.#makeError(input, result, expect, unit);
 
         if (expect.match(/^!\|/)) { 
             if (result === expect.replace(/^!\|/, "")) error();
@@ -66,6 +112,14 @@ class NoBroCote {
         }
     }
 
+
+    /**
+     * Creates a test unit.
+     * @param {string} name - Unit Name
+     * @param {*} expect - expected result 
+     * @param {Function} fn - The actual test. A function for testing.
+     * @param  {...any} [fnArgs] - Optional. Parameters for the function. 
+     */
     makeUnit(name, expect, fn, ...fnArgs) {
         
         if (name in this.units) {
@@ -91,15 +145,20 @@ class NoBroCote {
                 }
 
                 if (throwErr) {
-                    this.makeError(inputStr, exception, expect, name);
+                    this.#makeError(inputStr, exception, expect, name);
                 }
             }
 
-            if (result) this.assert(result, expect, name, inputStr);
+            if (result) this.#assert(result, expect, name, inputStr);
         };
     }
 
-    makeError(input, output, expected, unit) {
+
+    /**
+     * Helper function. Creates an error is
+     * the results object. 
+     */
+    #makeError(input, output, expected, unit) {
         
         this.results.errors ++;
         const errObj = {
@@ -112,16 +171,22 @@ class NoBroCote {
         this.results.errorMessages[unit] = errObj;
     }
 
+
+    /**
+     * The final thing to do, when creating a test
+     * group is calling this init function to make
+     * it work.
+     */
     async init() {
         if (!this.initialize) {
             return;
         }
         
         let content, relClassPath;
-        [content, relClassPath] = await this.compileServerVars();
+        [content, relClassPath] = await this.#compileServerVars();
 
         const server = await import("../src/server.js");
-        this.server = new server.HTMLPageServer(relClassPath);
+        this.server = new server.NoBroCoteHTMLServer(relClassPath);
 
         const result = await this.server.run(content, relClassPath);
 
@@ -144,7 +209,13 @@ class NoBroCote {
         process.exit(exitCode);
     }
 
-    async compileServerVars() {
+
+    /**
+     * Helper function. Prepares the test group for 
+     * the HTML page. Adjusts imports, corrects paths.
+     * @returns {string[]} - Script tag content / relative class path
+     */
+    async #compileServerVars() {
         // import libraries
         const fs = await import("fs");
         const url = await import("url");
@@ -199,6 +270,11 @@ class NoBroCote {
 
     }
 
+
+    /**
+     * Test execution. Called inside of HTML page.
+     * @returns {Object} - test results 
+     */
     async run() {
         const unitNames = Object.keys(this.units);
         

@@ -191,7 +191,6 @@ class NoBroCote {
         }
 
         const instanceVar = varMatch[0].trim().split(/\s/).at(-1);
-        console.log(instanceVar);
 
         const imports = this.imports.join("\n");
         content = `\n${imports}\n${content}\nwindow.testInstance = ${instanceVar};\n`;

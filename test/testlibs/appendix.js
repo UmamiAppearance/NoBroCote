@@ -3,5 +3,6 @@ const appendix = async (text) => {
     div.id = text;
     div.textContent = text;
     document.body.append(div);
+    console.log();
 };
 export { appendix };

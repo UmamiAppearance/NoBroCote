@@ -10,7 +10,7 @@
     "es6": true
   },
   "scripts": {
-    "test": "node test/self.test.js",
+    "test": "node --no-deprecation test/self.test.js",
     "lint": "eslint ./src/"
   },
   "repository": {
@@ -30,7 +30,8 @@
   },
   "homepage": "https://github.com/UmamiAppearance/NoBroCote#readme",
   "dependencies": {
-    "puppeteer": "^14.1.0"
+    "puppeteer": "^14.1.0",
+    "url-exist": "^3.0.0"
   },
   "devDependencies": {
     "eslint": "^8.15.0"

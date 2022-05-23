@@ -269,6 +269,8 @@ class NoBroCote {
         const fs = await import("fs");
         const path = await import("path");
         const url = await import("url");
+        const { default: urlExist }  = await import("url-exist");
+
 
         // get path of script
         const instanceFilePath = url.fileURLToPath(this.fileName);
@@ -319,11 +321,20 @@ class NoBroCote {
             if (pathMatch.length < 2) {
                 throw new Error(`Cannot find a path in import statement '${statement}'`);
             }
-            const relPath = pathMatch[1];
+            const destination = pathMatch[1];
 
-            // ignore url imports from
-            if (!relPath.match(/^(http)/)) {
-                const importPath = path.join(this.rootDir, relPath);
+            // handle urls
+            if (destination.match(/^(?:http(s)?:\/\/)/)) {
+
+                if (!(await urlExist(destination))) {
+                    throw new Error(`URL '${destination}' cannot be resolved`);
+                }
+            }
+
+            // handle relative imports
+            else {
+                const importPath = path.join(this.rootDir, destination);
+                
                 fs.access(importPath, fs.F_OK, (err) => {
                     if (err) {
                         throw new Error(`Cannot resolve path '${importPath}'`);

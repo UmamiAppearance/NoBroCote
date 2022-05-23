@@ -3,7 +3,7 @@ import child_process from "child_process";
 const callTest = async (name) => {
     let exitNode = 0;
 
-    const successFN = child_process.exec(`node ./test/${name}.test.js`, (error, stdout, stderr) => {
+    const successFN = child_process.exec(`node --no-deprecation ./test/${name}.test.js`, (error, stdout, stderr) => {
         if (error) {
             exitNode = 1;
         }

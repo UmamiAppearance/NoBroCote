@@ -7,9 +7,8 @@
  */
 
 
-// Imports are done asynchronously and on the fly.
-// Otherwise the imports would probably look like
-// so:
+// Imports are are dynamically added. Just as a reminder, 
+// they are listed here:
 // -------------------------------------------------- //
 // import { NoBroCoteHTMLServer } from "./server.js";
 // import { readFileSync } from "fs";
@@ -62,14 +61,52 @@ class NoBroCote {
         }
         
         // prepare imports and unit array and object
+        this.additionalScripts = new Array();
         this.imports = new Array();
         this.units = new Object();
     }
 
 
     /**
-     * Imports for the test runner html page
-     * @param {(string|string[])} imports 
+     * Additional scripts to be loaded into the page,
+     * before testing. It requires an object which can 
+     * have the following keys (as defined by puppeteer):
+     * cf. https://devdocs.io/puppeteer/
+     * 
+     *  - url <string> URL of a script to be added.
+     *  - path <string> Path to the JavaScript file to be injected into frame. If path is a relative path, then it is resolved relative to projects root directory (cwd).
+     *  - content <string> Raw JavaScript content to be injected into frame.
+     *  - type <string> Script type. Use 'module' in order to load a Javascript ES6 module.
+     * 
+     * You can also pass an array of objects.
+     * 
+     * @param {(Object|Object[])} script - Script object (or array of objects) as required by puppeteer  
+     */
+    addScript(script) {
+        if (!this.initialize) {
+            return;
+        }
+
+        if (typeof script === "object") {
+            this.additionalScripts.push();
+        } else if (Array.isArray(script)) {
+            this.additionalScripts.push(...script);
+        } else {
+            throw new TypeError("Imports must be an object or an array of objects.");
+        }
+    }
+
+
+    /**
+     * ES6 imports for the test runner. In contrast
+     * to 'addScripts', this functions needs a valid
+     * ES6 import statement. These imports are directly
+     * accessible by the test units as they are part of
+     * one script tag. Relative imports are resolved 
+     * relative to the projects root directory (cwd).
+     * Multiple imports can be passed as an array.
+     * 
+     * @param {(string|string[])} imports - ES6 Import statement (ore array of statements)
      */
     addImport(imports) {
         if (!this.initialize) {
@@ -87,9 +124,8 @@ class NoBroCote {
 
 
     /**
-     * Helper function. Compares expected and
-     * actual results. Handles operators for
-     * the expect value. 
+     * Helper function. Compares expected and actual results.
+     * Handles operators for the expect value. 
      */
     #assert(result, expect, unit, input) {
         const error = () => this.#makeError(input, result, expect, unit);
@@ -114,7 +150,18 @@ class NoBroCote {
 
 
     /**
-     * Creates a test unit.
+     * Creates a test unit. A test unit takes a unit name,
+     * the expected result, a standalone function and 
+     * optionally arguments for that function.
+     * 
+     * The function has access to the html page. It acts like a
+     * single function you would execute in a script tag. It has
+     * access to all scripts and modules passed via 'addScript'
+     * or 'addImport'.
+     * 
+     * The function can be asynchronous or not. It must return 
+     * something which can be compared with the expected result.
+     * 
      * @param {string} name - Unit Name
      * @param {*} expect - expected result 
      * @param {Function} fn - The actual test. A function for testing.
@@ -155,8 +202,8 @@ class NoBroCote {
 
 
     /**
-     * Helper function. Creates an error is
-     * the results object. 
+     * Helper function. Creates an error which is added
+     * to the results object. 
      */
     #makeError(input, output, expected, unit) {
         
@@ -175,7 +222,8 @@ class NoBroCote {
     /**
      * The final thing to do, when creating a test
      * group is calling this init function to make
-     * it work.
+     * it work. It collects and compiles everything
+     * and starts the actual test. 
      */
     async init() {
         if (!this.initialize) {
@@ -188,7 +236,7 @@ class NoBroCote {
         const server = await import("../src/server.js");
         this.server = new server.NoBroCoteHTMLServer(relClassPath);
 
-        const result = await this.server.run(content, relClassPath);
+        const result = await this.server.run(content, this.additionalScripts);
 
         let exitCode = 0;
         if (!result.errors) {
@@ -213,7 +261,7 @@ class NoBroCote {
     /**
      * Helper function. Prepares the test group for 
      * the HTML page. Adjusts imports, corrects paths.
-     * @returns {string[]} - Script tag content / relative class path
+     * @returns {string[]} - [Script tag content, relative class path]
      */
     async #compileServerVars() {
         // import libraries
@@ -267,7 +315,6 @@ class NoBroCote {
         content = `\n${imports}\n${content}\nwindow.testInstance = ${instanceVar};\n`;
 
         return [content, relClassPath];
-
     }
 
 

@@ -65,7 +65,7 @@ class NoBroCoteHTMLServer {
     }
 
 
-    async run(script) {
+    async run(script, additionalScripts) {
         this.server.listen(this.port);
         console.log(`- spinning up local http test server at "127.0.0.1:${this.port}/"`);
 
@@ -86,18 +86,16 @@ class NoBroCoteHTMLServer {
         });
 
         await page.goto(`http://127.0.0.1:${this.port}/`);
-        
-        console.log("  + appending test scripts");
-        await page.evaluate(script => {
-            // append tests to document head as module
-            const scriptTag = document.createElement("script");
-            scriptTag.type = "module";
-            scriptTag.innerHTML = script;
-            document.head.append(scriptTag);
 
-            // prepare empty document body
-            document.body.innerHTML = "";
-        }, script);
+        console.log("  + preparing empty page body");
+        await page.evaluate(() => document.body.innerHTML = "");
+
+        for (const scriptObj of additionalScripts) {
+            await page.addScriptTag(scriptObj);
+        }
+        
+        console.log("  + appending test group");
+        await page.addScriptTag({type: "module", content: script});
         
         // wait for test instance to be ready
         await page.waitForFunction("typeof window.testInstance !== 'undefined'");

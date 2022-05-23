@@ -88,7 +88,7 @@ class NoBroCote {
         }
 
         if (typeof script === "object") {
-            this.additionalScripts.push();
+            this.additionalScripts.push(script);
         } else if (Array.isArray(script)) {
             this.additionalScripts.push(...script);
         } else {
@@ -130,16 +130,16 @@ class NoBroCote {
     #assert(result, expect, unit, input) {
         const error = () => this.#makeError(input, result, expect, unit);
 
-        if (expect.match(/^!\|/)) { 
-            if (result === expect.replace(/^!\|/, "")) error();
+        if (String(expect).match(/^!\|/)) { 
+            if (result === String(expect).replace(/^!\|/, "")) error();
         } 
         
-        else if (expect.match(/^\|\|/)) {
+        else if (String(expect).match(/^\|\|/)) {
             const valid = expect.split("|").slice(2);
             if (!valid.includes(result)) error();
         }
 
-        else if (expect.match(/^==\|/)) {
+        else if (String(expect).match(/^==\|/)) {
             if (result != expect.replace(/^==\|/, "")) error();
         }
         
@@ -184,7 +184,7 @@ class NoBroCote {
                 
                 let throwErr = true;
                 
-                if (expect.match(/^e|/)) {
+                if (String(expect).match(/^e|/)) {
                     const errType = expect.replace(/^(e\|)/, "");
                     if (this.errorList.includes(errType) && (errType === "" || err.name === errType)) {
                         throwErr = false;

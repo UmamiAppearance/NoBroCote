@@ -2,14 +2,47 @@ import { NoBroCote } from "../src/no-bro-cote.js";
 
 const testSuccess = new NoBroCote(import.meta.url);
 
+// test injection of a regular script tag
+testSuccess.addScript({path: "./test/testlibs/wade.min.js"});
+
+// test injection relative module
+testSuccess.addImport("import { appendix } from './test/testlibs/rel-mod.js';");
+
 testSuccess.makeUnit(
     "defaultExample",
     "true",
     () => {
+        console.groupCollapsed(document.head.innerHTML);
         document.body.textContent = "true";
         return document.body.textContent;
     }
 );
+
+testSuccess.makeUnit(
+    "useRegularScript",
+    1,
+    () => {
+        // eslint-disable-next-line no-undef
+        const search = Wade(["Apple", "Lemon", "Orange", "Tomato"]);
+        const searchResults = search("Lem");
+        console.log(searchResults);
+        return searchResults[0].index;
+    }
+);
+
+
+
+testSuccess.makeUnit(
+    "testRelativeImport",
+    "wow",
+    async () => {
+        console.log("am I here?");
+        await appendix("wow");
+        console.log("am I here?");
+        return document.querySelector("#wow").textContent;
+    }
+);
+
 
 testSuccess.makeUnit(
     "convertTypeExample",

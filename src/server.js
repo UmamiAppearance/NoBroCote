@@ -91,6 +91,7 @@ class NoBroCoteHTMLServer {
         await page.evaluate(() => document.body.innerHTML = "");
 
         for (const scriptObj of additionalScripts) {
+            console.log(script);
             await page.addScriptTag(scriptObj);
         }
         

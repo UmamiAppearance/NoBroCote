@@ -10,13 +10,24 @@ import { createServer } from "http";
 import puppeteer from "puppeteer";
 import { readFile } from "fs";
 
-
+/**
+ * HTML Test runner. It contains a http test
+ * server and uses puppeteer to run javascript
+ * for the browser.
+ */
 class NoBroCoteHTMLServer {
+
+    /**
+     * Creates the puppeteer instance. The path of
+     * NoBroCote main class must be passed to it.
+     * @param {string} relClassPath - Path of NoBoCote Class 
+     */
     constructor(relClassPath) {
         this.port = 9999;
         this.tests = null;
         this.relClassPath = relClassPath;
 
+        // http server
         this.mimeTypes = {
             html: "text/html",
             js: "text/javascript"
@@ -64,7 +75,12 @@ class NoBroCoteHTMLServer {
 
     }
 
-
+    /**
+     * Test Runner. Called after everything is initialized.
+     * @param {string} script - Content of main script as string
+     * @param {Object[]} additionalScripts - Array of puppeteer 
+     * @returns 
+     */
     async run(script, additionalScripts) {
         this.server.listen(this.port);
         console.log(`- spinning up local http test server at "127.0.0.1:${this.port}/"`);
@@ -90,6 +106,7 @@ class NoBroCoteHTMLServer {
         console.log("  + preparing empty page body");
         await page.evaluate(() => document.body.innerHTML = "");
 
+        // add additional scripts
         for (const scriptObj of additionalScripts) {
             await page.addScriptTag(scriptObj);
         }

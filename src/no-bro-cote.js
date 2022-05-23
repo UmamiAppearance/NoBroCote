@@ -264,8 +264,10 @@ class NoBroCote {
      * @returns {string[]} - [Script tag content, relative class path]
      */
     async #compileServerVars() {
+        
         // import libraries
         const fs = await import("fs");
+        const path = await import("path");
         const url = await import("url");
 
         // get path of script
@@ -308,8 +310,27 @@ class NoBroCote {
         if (!varMatch) {
             throw new Error(`Could not find instance filename in ${relInstancePath}`);
         }
-
         const instanceVar = varMatch[0].trim().split(/\s/).at(-1);
+
+        // test import paths
+        for (const statement of this.imports) {
+            // eslint-disable-next-line quotes
+            const pathMatch = statement.replaceAll('"', '"').split("'");
+            if (pathMatch.length < 2) {
+                throw new Error(`Cannot find a path in import statement '${statement}'`);
+            }
+            const relPath = pathMatch[1];
+
+            // ignore url imports from
+            if (!relPath.match(/^(http)/)) {
+                const importPath = path.join(this.rootDir, relPath);
+                fs.access(importPath, fs.F_OK, (err) => {
+                    if (err) {
+                        throw new Error(`Cannot resolve path '${importPath}'`);
+                    }
+                });
+            }
+        }
 
         const imports = this.imports.join("\n");
         content = `\n${imports}\n${content}\nwindow.testInstance = ${instanceVar};\n`;

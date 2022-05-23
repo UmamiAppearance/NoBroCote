@@ -12,7 +12,6 @@ testSuccess.makeUnit(
     "defaultExample",
     "true",
     () => {
-        console.groupCollapsed(document.head.innerHTML);
         document.body.textContent = "true";
         return document.body.textContent;
     }
@@ -25,20 +24,17 @@ testSuccess.makeUnit(
         // eslint-disable-next-line no-undef
         const search = Wade(["Apple", "Lemon", "Orange", "Tomato"]);
         const searchResults = search("Lem");
-        console.log(searchResults);
         return searchResults[0].index;
     }
 );
-
 
 
 testSuccess.makeUnit(
     "testRelativeImport",
     "wow",
     async () => {
-        console.log("am I here?");
+        // eslint-disable-next-line no-undef
         await appendix("wow");
-        console.log("am I here?");
         return document.querySelector("#wow").textContent;
     }
 );

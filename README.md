@@ -4,7 +4,7 @@
 **NoBroCote** is designed for the automation of testing JavaScript code which is made for the browser. It provides methods to run the code units inside of a headless browser via [Puppeteer](https://github.com/puppeteer/puppeteer). **NoBroCote** makes it possible to test the code via node, without having to open a browser, and also without writing the test environment from scratch every time. It is as simple as it gets up to this point. More feature may follow.
 
 # Installation
-**NoBroCote** is made for unit tests with node.js, therefore a installation via npm is advisable. As it most likely is only needed for testing with the ``--save-dev`` flag.
+**NoBroCote** is made for unit tests with node.js, therefore a installation via npm is advisable. As it is most likely is only needed for testing with the ``--save-dev`` flag.
 
 ```sh
 npm install no-brote-cote --save-dev
@@ -12,11 +12,12 @@ npm install no-brote-cote --save-dev
 
 # Usage
 The first step is to create a new ``.js`` file (most likely in your test folder). Inside of this file all that have to be done ist importing the main module ``NoBroCote``.  
+    
 **(Psst. No 'time' for reading? Jump straight to the full [sample code](https://github.com/UmamiAppearance/NoBroCote#Complete-Sample-Code).)**
 
 ## Importing
 ```js
-import NoBroCote from "./my/path/";
+import NoBroCote from "no-bro-code";
 ```
 
 ## First Steps
@@ -101,7 +102,7 @@ To use this as a test for a node package, simply add the line to ``package.json`
 
 ## Complete Sample Code
 ```js
-import NoBroCote from "./my/path/";
+import NoBroCote from "no-bro-cote";
 
 const test = new NoBroCode(import.meta.url);
 

@@ -1,7 +1,7 @@
 # NoBroCote
 **No**de **Bro**wser **Co**de **te**sting. _Run unit tests on your JavaScript code for the browser._  
   
-**NoBroCote** is designed for the automation of testing JavaScript code which is made for the browser. It provides methods to run the code units inside of a headless browser via [Puppeteer](https://github.com/puppeteer/puppeteer). NoBroCote makes it possible to test the code via node, without having to open a browser, and also without writing the test environment from scratch every time. It is as simple as it gets up to this point. More feature may follow.
+**NoBroCote** is designed for the automation of testing JavaScript code which is made for the browser. It provides methods to run the code units inside of a headless browser via [Puppeteer](https://github.com/puppeteer/puppeteer). **NoBroCote** makes it possible to test the code via node, without having to open a browser, and also without writing the test environment from scratch every time. It is as simple as it gets up to this point. More feature may follow.
 
 # Installation
 **NoBroCote** is made for unit tests with node.js, therefore a installation via npm is advisable. As it most likely is only needed for testing with the ``--save-dev`` flag.
@@ -12,7 +12,7 @@ npm install no-brote-cote --save-dev
 
 # Usage
 The first step is to create a new ``.js`` file (most likely in your test folder). Inside of this file all that have to be done ist importing the main module ``NoBroCote``.  
-**(Psst. No 'time' for reading? Jump straight to the full [sample code](https://github.com/UmamiAppearance/NoBroCote#Complete-Sample-Code))**
+**(Psst. No 'time' for reading? Jump straight to the full [sample code](https://github.com/UmamiAppearance/NoBroCote#Complete-Sample-Code).)**
 
 ## Importing
 ```js
@@ -34,8 +34,9 @@ After initialization it is time to create a test unit. A test unit takes:
 - ``fn`` \<Function\> The actual test. A function for testing.
 - ``fnArgs`` \<...any\> Optional parameters for the function. 
 
-The function has access to the html page. It acts like a single function you would execute in a script tag. It has access to all scripts and modules passed via 'addScript' or 'addImport'. The function can be asynchronous or not. It must return something which can be compared with the expected result.  
-**Example:**
+The function has access to the html page. It acts like a single function you would execute in a script tag. It has access to all scripts and modules passed via ``addScript`` or ``addImport``. The function can be asynchronous or not. It must return something which can be compared with the expected result.  
+**Example:**  
+
  ```js
 test.makeUnit(
     "myFirstUnit",
@@ -48,8 +49,11 @@ test.makeUnit(
  ```
 
 ### Importing Scripts and Modules
-There are two methods to provide access to external libraries (or the one that is to be tested). The first method (``test.addScript``) is a simple global import which is getting passed to **Puppeteer** (cf. [devdocs.io/puppeteer](https://devdocs.io/puppeteer/)). This can be any classic script tag or ES6 module which provides global access (to the entire HTML page).  
-The second method (``test.addImport``) takes ES6 import statements as an input, which become part of one script tag with the test units. Global availability is therefore not necessary.
+There are two methods to provide access to external libraries (or the one that is to be tested).  
+  
+The _first method_ (``test.addScript``) is a simple global import which is getting passed to **Puppeteer** (cf. [devdocs.io/puppeteer](https://devdocs.io/puppeteer/)). This can be any classic script tag or ES6 module which provides global access (to the entire HTML page).  
+  
+The _second method_ (``test.addImport``) takes ES6 import statements as an input, which become part of one script tag with the test units. Global availability is therefore not necessary.
 
 #### addScript
 The method requires an object which can have the following keys (as defined by Puppeteer):
@@ -58,7 +62,7 @@ The method requires an object which can have the following keys (as defined by P
  - ``content`` \<string\> Raw JavaScript content to be injected into frame.
  - ``type`` \<string> Script type. Use 'module' in order to load a Javascript ES6 module.
  
-You can also pass an array of objects. An **example** may look like so:
+_You can also pass an array of objects. An **example** may look like so:_
 
 ```js
 test.addScript({
@@ -67,16 +71,16 @@ test.addScript({
  ```
 
 #### addImport
-This method provides ES6 imports for the test runner. In contrast to ``addScripts``, this method needs a valid ES6 import statement as a string. These imports are directly accessible by the test units as they are part of one script tag in the browser.  
-Relative imports are resolved relative to the projects root directory (cwd).  
-Multiple imports can be passed as an array. A possible **example** may be as follows:
+This method provides ES6 imports for the test runner. In contrast to ``addScripts``, this method needs a valid ES6 import statement as a string. These imports are directly accessible by the test units as they are part of one script tag in the browser.
+ - Relative imports are resolved relative to the projects root directory (cwd).
+ - Multiple imports can be passed as an array. A possible **example** may be as follows:
 
 ```js
 test.addImport('import myModule from "./path/to/module"');
  ```
 
 ### Running the Tests
-What to do to actually run the tests? Not much. After all imports are done and all units are declared all that is left to to is to set at the end of the file the following line:
+What to do to actually run the tests? _Not much._ After all imports are done and all units are declared all that is left to to is to set at the end of the file the following line:
 
 ```js
 test.init();
@@ -182,23 +186,3 @@ This work is licensed under [GPL-3.0](https://opensource.org/licenses/GPL-3.0).
                                          ...o..
                                             .
 ```
-
-
-
-
-
-----
-page.addScriptTag(options)
-
-    options <Object>
-        url <string> URL of a script to be added.
-        
-        path <string> Path to the JavaScript file to be injected into frame. If path is a relative path, then it is resolved relative to current working directory.
-        
-        content <string> Raw JavaScript content to be injected into frame.
-        
-        type <string> Script type. Use 'module' in order to load a Javascript ES6 module. See script for more details.
-    
-    returns: <Promise<ElementHandle>> which resolves to the added tag when the script's onload fires or when the script content was injected into frame.
-
-Adds a <script> tag into the page with the desired url or content.

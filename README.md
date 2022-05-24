@@ -74,7 +74,7 @@ test.addScript({
 #### addImport
 This method provides ES6 imports for the test runner. In contrast to ``addScripts``, this method needs a valid ES6 import statement as a string. These imports are directly accessible by the test units as they are part of one script tag in the browser.
  - Relative imports are resolved relative to the projects root directory (cwd).
- - Multiple imports can be passed as an array. A possible **example** may be as follows:
+ - Multiple imports can be passed as an array. _A possible **example** may be as follows:_
 
 ```js
 test.addImport('import myModule from "./path/to/module"');

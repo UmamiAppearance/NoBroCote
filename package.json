@@ -1,6 +1,6 @@
 {
   "name": "no-bro-cote",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Node Browser Code Testing. Run tests on your JavaScript code for the browser.",
   "main": "./src/no-bro-cote.js",
   "type": "module",

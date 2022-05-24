@@ -18,9 +18,13 @@
     "url": "git+https://github.com/UmamiAppearance/NoBroCote.git"
   },
   "keywords": [
+    "Browser",
+    "JavaScript",
+    "Node",
+    "node.js",
     "Test",
     "Test Runner",
-    "Browser",
+    "Unit Testing",
     "Puppeteer"
   ],
   "author": "UmamiAppearance",

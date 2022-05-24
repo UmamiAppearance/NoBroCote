@@ -1,4 +1,8 @@
 # NoBroCote
+[![License](https://img.shields.io/github/license/UmamiAppearance/NoBroCote?color=009911&style=for-the-badge)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/no-bro-cote?color=009911&style=for-the-badge)](https://www.npmjs.com/package/no-bro-cote)
+
+
 **No**de **Bro**wser **Co**de **te**sting. _Run unit tests on your JavaScript code for the browser._  
   
 **NoBroCote** is designed for the automation of testing JavaScript code which is made for the browser. It provides methods to run the code units inside of a headless browser via [Puppeteer](https://github.com/puppeteer/puppeteer). **NoBroCote** makes it possible to test the code via node, without having to open a browser, and also without writing the test environment from scratch every time. It is as simple as it gets up to this point. More feature may follow.

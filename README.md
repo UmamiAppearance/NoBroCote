@@ -28,7 +28,7 @@ const test = new NoBroCode(import.meta.url);
 ```
 
 ## Importing Scripts and Modules
-There are two methods to provide access to external libraries (or the one that is to be tested). The first method (``test.addScript``) is a simple global import which is getting passed to **Puppeteer**. This can be any classic script tag or ES6 Module which provides global access (to the entire HTML page). 
+There are two methods to provide access to external libraries (or the one that is to be tested). The first method (``test.addScript``) is a simple global import which is getting passed to **Puppeteer** (cf. [devdocs.io/puppeteer/](https://devdocs.io/puppeteer/)). This can be any classic script tag or ES6 Module which provides global access (to the entire HTML page). 
 
 The method requires an object which can have the following keys (as defined by Puppeteer):
  - ``url`` \<string\> URL of a script to be added.
@@ -40,7 +40,7 @@ The method requires an object which can have the following keys (as defined by P
 
 ## Creating Test Units
 After initialization it is time to create a test unit. A test unit takes:  
-- ``name`` <string> Unit Name
+- ``name`` \<string\> Unit Name
 - ``expect`` \<*\> Expected result 
 - ``fn`` \<Function\> The actual test. A function for testing.
 - ``fnArgs`` \<...any\> Optional parameters for the function. 

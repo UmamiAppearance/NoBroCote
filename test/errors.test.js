@@ -1,4 +1,4 @@
-import { NoBroCote } from "../src/no-bro-cote.js";
+import NoBroCote from "../src/no-bro-cote.js";
 
 const testErrors = new NoBroCote(import.meta.url);
 

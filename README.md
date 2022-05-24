@@ -7,13 +7,47 @@
 # Installation
 **NoBroCote** is made for unit tests with node.js, therefore a installation via npm is advisable. As it most likely is only needed for testing with the ``--save-dev`` flag.
 
-# Usage
-The first step is to create a new ``.js`` file (most likely in your test folder). Inside of this file 
-
 ```shell
 npm install no-brote-cote --save-dev
 ```
 
+# Usage
+The first step is to create a new ``.js`` file (most likely in your test folder). Inside of this file all that have to be done ist importing the main module ``NoBroCote``.
+
+## Importing
+```js
+import NoBroCote from "./my/path/";
+```
+
+## First Steps
+
+### Initializing
+To initialize the test runner, a new instance of the main class is getting created. Here comes a little peculiarity. To tell the main class where the instance is to be found in the filesystem it is getting initialized with ``import.meta.url``. This is mandatory, as the test file is also imported into the html page for the testing and needs to be located.
+```js
+const test = new NoBroCode(import.meta.url);
+```
+
+## Importing Scripts and Modules
+There are two methods to provide access to external libraries (or the one that is to be tested). The first method (``test.addScript``) is a simple global import which is getting passed to **Puppeteer**. This can be any classic script tag or ES6 Module which provides global access (to the entire HTML page). 
+
+The method requires an object which can have the following keys (as defined by Puppeteer):
+ - ``url`` \<string\> URL of a script to be added.
+- ``path`` \<string\> Path to the JavaScript file to be injected into frame. If path is a relative path, then it is resolved relative to projects root directory (cwd).
+ - ``content`` \<string\> Raw JavaScript content to be injected into frame.
+ - ``type`` \<string> Script type. Use 'module' in order to load a Javascript ES6 module.
+ 
+ You can also pass an array of objects.
+
+## Creating Test Units
+After initialization it is time to create a test unit. A test unit takes:  
+- ``name`` <string> Unit Name
+- ``expect`` \<*\> Expected result 
+- ``fn`` \<Function\> The actual test. A function for testing.
+- ``fnArgs`` \<...any\> Optional parameters for the function. 
+
+The function has access to the html page. It acts like a single function you would execute in a script tag. It has access to all scripts and modules passed via 'addScript' or 'addImport'. The function can be asynchronous or not. It must return something which can be compared with the expected result.
+
+ 
 
 
 ```
@@ -43,10 +77,10 @@ npm install no-brote-cote --save-dev
        ..;dd;'....kooooooooou*'.....cgggg......:uoOX.......*MMMMMM*......,dd;..
          ..;od;'.......................................................',dd;..
            ..,dx:'...................................................';dd;..
-             ..'ldc'........;dkxx:..;dkxkl..xXXXXXx..MXXXX.........':do,..
+             ..'ldc'........;dkXX:..;dkxkl..MXXXXXM..MXXXM.........':do,..
                ...cxl,.....:MX,....,WK'.oMx...cMd....MXL,,.......';xo'..
                   ..cdd,'..:MK,....;WK'.lMx...cMd....MXP"".....':do'..
-                    ..;dd,'.;xOkk:..;xOkOl....cOd....MXXXX...,cxo'..
+                    ..;dd,'.;xOXX:..;xOkOl....cOd....MXXXM...,cxo'..
                       ..,od;'..............................'cdl'..
                         ..'oxc,..........................'cxc...
                           ..'ldl'......................,odl...

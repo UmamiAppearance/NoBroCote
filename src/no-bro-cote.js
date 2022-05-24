@@ -70,7 +70,7 @@ class NoBroCote {
     /**
      * Additional scripts to be loaded into the page,
      * before testing. It requires an object which can 
-     * have the following keys (as defined by puppeteer):
+     * have the following keys (as defined by Puppeteer):
      * cf. https://devdocs.io/puppeteer/
      * 
      *  - url <string> URL of a script to be added.
@@ -302,7 +302,7 @@ class NoBroCote {
         // likely redundant -> confirm that
         const regexpNode = new RegExp("^import.*no-bro-cote.*$", "m");
         const regexpFile = new RegExp(`^import.*${classFileName}.*$`, "m");
-        const importStatement = `import { NoBroCote } from "${dirDots}${relClassPath}";`;
+        const importStatement = `import NoBroCote from "${dirDots}${relClassPath}";`;
         content = content
             .replace(regexpNode, importStatement)
             .replace(regexpFile, importStatement);
@@ -377,4 +377,4 @@ class NoBroCote {
     }
 }
 
-export { NoBroCote };
+export default NoBroCote;

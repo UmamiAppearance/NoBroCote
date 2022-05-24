@@ -2,8 +2,17 @@
 **No**de **Bro**wser **Co**de **te**sting. Run unit tests on your JavaScript code for the browser.
 
 # About
-**NoBroCote** is designed for helping the automation of testing JavaScript code which is made for the browser. It is as simple as it gets up to this point. It provides methods to run the code  units inside of a headless browser via puppeteer.
+**NoBroCote** is designed for the automation of testing JavaScript code which is made for the browser. It provides methods to run the code units inside of a headless browser via [Puppeteer](https://github.com/puppeteer/puppeteer). NoBroCote makes it possible to test the code via node, without having to open a browser, and also without writing the test environment for scratch every time. It is as simple as it gets up to this point. More feature may follow.
 
+# Installation
+**NoBroCote** is made for unit tests with node.js, therefore a installation via npm is advisable. As it most likely is only needed for testing with the ``--save-dev`` flag.
+
+# Usage
+The first step is to create a new ``.js`` file (most likely in your test folder). Inside of this file 
+
+```shell
+npm install no-brote-cote --save-dev
+```
 
 
 
@@ -29,9 +38,9 @@
    ..'lxc'........KMMMNOOOXMMWO'....cMMMM...oNMMWc....OMMMM'.......NMMMO......'cdl'..
  ..'odc,..........KMMMW00KXMMW0c....cMMMMMMMMMM0,.....0MMMW........XMMMK........'cdo'..
 ...lxc'...........KMMP.....oMMMM,...cMMMM::lOMMMX:....oMMMMl......;MMMMl........,ldc...
-  ..'lxl,.........KMMM....,KMMMW'...cMMMM'...dMMMWc....xMMMMk;;;;xWMMMd.......,lx:..
+  ..'lxl,.........KMMM....,KMMMW'...cMMMM'...dMMMWc....xMMMMk....xWMMMd.......,lx:..
     ..'cdo,.......KMMMMMMMMMWXk;....cMMMM'....oMMMMo....ikXMMMMMMMMXkj.....',odc..
-       ..;dd;'....kooooooooou*'.....cgggg......:uoOX.......'ccccc:'.......,dd;..
+       ..;dd;'....kooooooooou*'.....cgggg......:uoOX.......*MMMMMM*......,dd;..
          ..;od;'.......................................................',dd;..
            ..,dx:'...................................................';dd;..
              ..'ldc'........;dkxx:..;dkxkl..xXXXXXx..MXXXX.........':do,..

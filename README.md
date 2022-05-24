@@ -1,5 +1,8 @@
 # NoBroCote
-**No**de **Bro**wser **Co**de **te**sting. Run tests on your JavaScript code for the browser.
+**No**de **Bro**wser **Co**de **te**sting. Run unit tests on your JavaScript code for the browser.
+
+# About
+**NoBroCote** is designed for helping the automation of testing JavaScript code which is made for the browser. It is as simple as it gets up to this point. It provides methods to run the code  units inside of a headless browser via puppeteer.
 
 
 
@@ -13,11 +16,11 @@
                               ..'ldl,............';od:..
                             ..'ldc,................',odc...
                           ..'ld:'.....................,ldl'..
-                        ..'oxc'..x,....po.....,,oo;,....':do'..
-                      ..,od:,....XWXc..kN'...c0kolox0l....':do,..
+                        ..'oxc'..pq....po.....,ooOoo,...':do'..
+                      ..,od:,....XWXc..kN'...c0k"*"x0l....':do,..
                     ..,dd;'......X0cXx'kN'..,Wx.....xW;.....';dd;..
                   ..;dd;'........X0.,O0ON'..'X0'...'0X,.......',odc..
-                ..;dd;'..........kx...o0O'...'okdddko'...........,ldc...
+                ..;dd;'..........X0...o0N'..."okdggko"...........,ldc...
               ..:do,'..............................................,ldl'..
             ..:xo,'..................................................':xo,..
           ..cdo,'.k00000000Oxo,.....c00000000Oko;........:dOKXNNXKOd:..';dd;..
@@ -25,16 +28,16 @@
      ..'ldc'......KMMM....'MMMMd....cMMMM....0MMM0....;WMMMO'....'kMMMW;...',odc...
    ..'lxc'........KMMMNOOOXMMWO'....cMMMM...oNMMWc....OMMMM'.......NMMMO......'cdl'..
  ..'odc,..........KMMMW00KXMMW0c....cMMMMMMMMMM0,.....0MMMW........XMMMK........'cdo'..
-...lxc'...........KMMM.....oMMMM,...cMMMM::lOMMMX:....oMMMMl......;MMMMl........,ldc...
+...lxc'...........KMMP.....oMMMM,...cMMMM::lOMMMX:....oMMMMl......;MMMMl........,ldc...
   ..'lxl,.........KMMM....,KMMMW'...cMMMM'...dMMMWc....xMMMMk;;;;xWMMMd.......,lx:..
     ..'cdo,.......KMMMMMMMMMWXk;....cMMMM'....oMMMMo....ikXMMMMMMMMXkj.....',odc..
-       ..;dd;'....iououououod'......cgggg......:uoOX.......':cccc:'.......,dd;..
+       ..;dd;'....kooooooooou*'.....cgggg......:uoOX.......'ccccc:'.......,dd;..
          ..;od;'.......................................................',dd;..
            ..,dx:'...................................................';dd;..
              ..'ldc'........;dkxx:..;dkxkl..xXXXXXx..MXXXX.........':do,..
-               ...cxl,.....:MX,....,WK'.oMx...cMd....MXL,,......';xo'..
-                  ..cdd,'..:MK,....;WK'.lMx...cMd....MXP""....':do'..
-                    ..;dd,'.;xOkk:..;xOkOl....cOd....MXXXX..,cxo'..
+               ...cxl,.....:MX,....,WK'.oMx...cMd....MXL,,.......';xo'..
+                  ..cdd,'..:MK,....;WK'.lMx...cMd....MXP"".....':do'..
+                    ..;dd,'.;xOkk:..;xOkOl....cOd....MXXXX...,cxo'..
                       ..,od;'..............................'cdl'..
                         ..'oxc,..........................'cxc...
                           ..'ldl'......................,odl...

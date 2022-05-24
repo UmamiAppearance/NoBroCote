@@ -30,10 +30,10 @@ const test = new NoBroCode(import.meta.url);
 
 ### Creating Test Units
 After initialization it is time to create a test unit. A test unit takes:  
-- ``name`` \<string\> Unit Name
-- ``expect`` \<*\> Expected result 
-- ``fn`` \<Function\> The actual test. A function for testing.
-- ``fnArgs`` \<...any\> Optional parameters for the function. 
+- ``name`` _\<string\>_ Unit Name
+- ``expect`` _\<*\>_ Expected result 
+- ``fn`` _\<Function\>_ The actual test. A function for testing.
+- ``fnArgs`` _\<...any\>_ Optional parameters for the function. 
 
 The function has access to the html page. It acts like a single function you would execute in a script tag. It has access to all scripts and modules passed via ``addScript`` or ``addImport``. The function can be asynchronous or not. It must return something which can be compared with the expected result.  
 **Example:**  
@@ -58,10 +58,10 @@ The _second method_ (``test.addImport``) takes ES6 import statements as an input
 
 #### addScript
 The method requires an object which can have the following keys (as defined by Puppeteer):
- - ``url`` \<string\> URL of a script to be added.
- - ``path`` \<string\> Path to the JavaScript file to be injected into frame. If path is a relative path, then it is resolved relative to projects root directory (cwd).
- - ``content`` \<string\> Raw JavaScript content to be injected into frame.
- - ``type`` \<string> Script type. Use 'module' in order to load a Javascript ES6 module.
+ - ``url`` _\<string\>_ URL of a script to be added.
+ - ``path`` _\<string\>_ Path to the JavaScript file to be injected into frame. If path is a relative path, then it is resolved relative to projects root directory (cwd).
+ - ``content`` _\<string\>_ Raw JavaScript content to be injected into frame.
+ - ``type`` _\<string\>_ Script type. Use 'module' in order to load a Javascript ES6 module.
  
 _You can also pass an array of objects. An **example** may look like so:_
 

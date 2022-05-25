@@ -31,6 +31,15 @@ testErrors.makeUnit(
 );
 
 testErrors.makeUnit(
+    "notWithTypeConversionExample",
+    "!=|42",
+    () => {
+        document.body.textContent = "42";
+        return Number(document.body.textContent);
+    }
+);
+
+testErrors.makeUnit(
     "orExample",
     "||cat|dog|bird",
     async () => {

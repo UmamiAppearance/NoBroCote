@@ -1,7 +1,7 @@
 {
   "name": "no-bro-cote",
-  "version": "0.1.0",
-  "description": "Node Browser Code Tests. Run tests on your JavaScript code for the browser.",
+  "version": "0.1.1",
+  "description": "Node Browser Code testing. Run unit tests on your JavaScript code for the browser.",
   "main": "./src/no-bro-cote.js",
   "type": "module",
   "env": {
@@ -38,6 +38,7 @@
     "url-exist": "^3.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.15.0"
+    "eslint": "^8.15.0",
+    "wade": "^0.3.3"
   }
 }

@@ -3,7 +3,7 @@ import NoBroCote from "../src/no-bro-cote.js";
 const testSuccess = new NoBroCote(import.meta.url);
 
 // test injection of a regular script tag
-testSuccess.addScript({path: "./test/testlibs/wade.min.js"});
+testSuccess.addScript({path: "./node_modules/wade/dist/wade.min.js"});
 
 // test injection relative module
 testSuccess.addImport("import { appendix } from './test/testlibs/appendix.js';");
@@ -56,6 +56,15 @@ testSuccess.makeUnit(
     () => {
         document.body.textContent = "cat";
         return document.body.textContent;
+    }
+);
+
+testSuccess.makeUnit(
+    "notWithTypeConversionExample",
+    "!=|42",
+    () => {
+        document.body.textContent = "4.2";
+        return Number(document.body.textContent);
     }
 );
 

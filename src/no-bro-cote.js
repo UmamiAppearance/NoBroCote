@@ -1,7 +1,7 @@
 /*
  * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.1.0
+ * @version 0.1.1
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
@@ -127,14 +127,24 @@ class NoBroCote {
 
     /**
      * Helper function. Compares expected and actual results.
-     * Handles operators for the expect value. 
+     * Handles operators for the expect value.
+     * 
+     * Possible operators are:
+     *     !| not
+     *    !=| not, with type conversion
+     *     || or, values can be separated with: valueA|valueB|valueC
+     *    ==| equality, with type conversion 
      */
     #assert(result, expect, unit, input) {
         const error = () => this.#makeError(input, result, expect, unit);
 
         if (String(expect).match(/^!\|/)) { 
-            if (result === String(expect).replace(/^!\|/, "")) error();
-        } 
+            if (result === expect.replace(/^!\|/, "")) error();
+        }
+        
+        else if (String(expect).match(/^!=\|/)) {
+            if (result == expect.replace(/^!=\|/, "")) error();
+        }
         
         else if (String(expect).match(/^\|\|/)) {
             const valid = expect.split("|").slice(2);

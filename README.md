@@ -1,4 +1,8 @@
 # NoBroCote
+[![License](https://img.shields.io/github/license/UmamiAppearance/NoBroCote?color=009911&style=for-the-badge)](./LICENSE)
+[![npm](https://img.shields.io/npm/v/no-bro-cote?color=009911&style=for-the-badge)](https://www.npmjs.com/package/no-bro-cote)
+
+
 **No**de **Bro**wser **Co**de **te**sting. _Run unit tests on your JavaScript code for the browser._  
   
 **NoBroCote** is designed for the automation of testing JavaScript code which is made for the browser. It provides methods to run the code units inside of a headless browser via [Puppeteer](https://github.com/puppeteer/puppeteer). **NoBroCote** makes it possible to test the code via node, without having to open a browser, and also without writing the test environment from scratch every time. It is as simple as it gets up to this point. More feature may follow.
@@ -13,7 +17,7 @@ npm install no-brote-cote --save-dev
 # Usage
 The first step is to create a new ``.js`` file (most likely in your test folder). Inside of this file all that have to be done ist importing the main module ``NoBroCote``.  
     
-**(Psst. No 'time' for reading? Jump straight to the full [sample code](https://github.com/UmamiAppearance/NoBroCote#Complete-Sample-Code).)**
+**(Psst. No 'time' for reading? Jump straight to a basic [sample code](https://github.com/UmamiAppearance/NoBroCote#Basic-Sample-Code).)**
 
 ## Importing
 ```js
@@ -23,7 +27,7 @@ import NoBroCote from "no-bro-code";
 ## First Steps
 
 ### Initializing
-To initialize the test runner, a new instance of the main class is getting created. Here comes a little peculiarity. To tell the main class where the instance is to be found in the filesystem it is getting initialized with ``import.meta.url``. This is mandatory, as the test file is also imported into the html page for the testing and needs to be located.
+To initialize the test runner, a new instance of the main class is getting created. Here comes a little peculiarity. To tell the main class where the instance is to be found in the filesystem, it is getting initialized with ``import.meta.url``. This is mandatory, as the test file is also imported into the html page for the testing and needs to be located.
 ```js
 const test = new NoBroCode(import.meta.url);
 ```
@@ -49,9 +53,46 @@ test.makeUnit(
 );
  ```
 
-### Importing Scripts and Modules
-There are two methods to provide access to external libraries (or the one that is to be tested).  
+#### Controlling the Test Assertion
+The regular assertion. Compares the expected value and the result for equality without type conversion (===). If this is not the desired behavior, there are some operators available to control the assertion process. Oparators are activated by passing them to the expect parameter of a ``makeUnit`` method.  
   
+_Available operators are:_
+ -  ``!|`` not
+ - ``!=|`` not, with type conversion
+ -  ``||`` or, values can be separated with: valueA|valueB|valueC
+ - ``==|`` equality, with type conversion
+
+
+#### Controlling Errors
+Sometimes it is necessary to test if an error is thrown. The test should throw the error, but that is the desired behavior not a failure. Similar to the just featured operators there are operators for errors (those keywords are also passed to the expect parameter).
+_Those are:_
+ - ``e|`` (for allowing all errors)
+ - ``e|EvalError``
+ - ``e|InternalError``
+ - ``e|RangeError``
+ - ``e|ReferenceError``
+ - ``e|SyntaxError``
+ - ``e|TypeError``
+ - ``e|URIError``
+
+##### Custom Errors
+Custom errors can be also be added to error list:
+```js
+// first create the error, eg:
+class ValidationError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = "ValidationError";
+    }
+}
+
+// second append it to the error list
+test.errorList.push(ValidationError);
+
+// now it can be used with: 'e|ValidationError'
+```
+
+### Importing Scripts and Modules
 The _first method_ (``test.addScript``) is a simple global import which is getting passed to **Puppeteer** (cf. [devdocs.io/puppeteer](https://devdocs.io/puppeteer/)). This can be any classic script tag or ES6 module which provides global access (to the entire HTML page).  
   
 The _second method_ (``test.addImport``) takes ES6 import statements as an input, which become part of one script tag with the test units. Global availability is therefore not necessary.
@@ -100,7 +141,7 @@ To use this as a test for a node package, simply add the line to ``package.json`
 },
 ```
 
-## Complete Sample Code
+## Basic Sample Code
 ```js
 import NoBroCote from "no-bro-cote";
 

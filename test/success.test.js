@@ -60,6 +60,15 @@ testSuccess.makeUnit(
 );
 
 testSuccess.makeUnit(
+    "notWithTypeConversionExample",
+    "!=|42",
+    () => {
+        document.body.textContent = "4.2";
+        return Number(document.body.textContent);
+    }
+);
+
+testSuccess.makeUnit(
     "orExample",
     "||cat|dog|bird",
     async () => {

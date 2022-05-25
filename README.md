@@ -27,7 +27,7 @@ import NoBroCote from "no-bro-code";
 ## First Steps
 
 ### Initializing
-To initialize the test runner, a new instance of the main class is getting created. Here comes a little peculiarity. To tell the main class where the instance is to be found in the filesystem it is getting initialized with ``import.meta.url``. This is mandatory, as the test file is also imported into the html page for the testing and needs to be located.
+To initialize the test runner, a new instance of the main class is getting created. Here comes a little peculiarity. To tell the main class where the instance is to be found in the filesystem, it is getting initialized with ``import.meta.url``. This is mandatory, as the test file is also imported into the html page for the testing and needs to be located.
 ```js
 const test = new NoBroCode(import.meta.url);
 ```
@@ -54,7 +54,11 @@ test.makeUnit(
  ```
 
 #### Controlling the Test Assertion
-TODO
+The regular assertion. Compares the expected value and the result for equality without type conversion (===). If this is not the desired behavior, there are some operators available to control the assertion process. Oparators are activated by passing them to the expect parameter of a ``makeUnit`` method. Available operators are:
+ - `` !|`` not
+ - ``!=|`` not, with type conversion
+ - `` ||`` or, values can be separated with: valueA|valueB|valueC
+ - ``==|`` equality, with type conversion    
 
 ### Importing Scripts and Modules
 There are two methods to provide access to external libraries (or the one that is to be tested).  

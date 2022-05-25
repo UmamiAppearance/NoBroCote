@@ -54,14 +54,43 @@ test.makeUnit(
  ```
 
 #### Controlling the Test Assertion
-The regular assertion. Compares the expected value and the result for equality without type conversion (===). If this is not the desired behavior, there are some operators available to control the assertion process. Oparators are activated by passing them to the expect parameter of a ``makeUnit`` method. Available operators are:
- - `` !|`` not
+The regular assertion. Compares the expected value and the result for equality without type conversion (===). If this is not the desired behavior, there are some operators available to control the assertion process. Oparators are activated by passing them to the expect parameter of a ``makeUnit`` method.  
+  
+_Available operators are:_
+ -  ``!|`` not
  - ``!=|`` not, with type conversion
- - `` ||`` or, values can be separated with: valueA|valueB|valueC
- - ``==|`` equality, with type conversion    
+ -  ``||`` or, values can be separated with: valueA|valueB|valueC
+ - ``==|`` equality, with type conversion
 
-### Importing Scripts and Modules
-There are two methods to provide access to external libraries (or the one that is to be tested).  
+
+#### Controlling Errors
+Sometimes it is necessary to test if an error is thrown. The test should throw the error, but that is the desired behavior not a failure. Similar to the just featured operators there are operators for errors (those keywords are also passed to the expect parameter).
+_Those are:_
+ - ``e|`` (for allowing all errors)
+ - ``e|EvalError``
+ - ``e|InternalError``
+ - ``e|RangeError``
+ - ``e|ReferenceError``
+ - ``e|SyntaxError``
+ - ``e|TypeError``
+ - ``e|URIError``
+
+##### Custom Errors
+Custom errors can be also be added to error list:
+```js
+// first create the error, eg:
+class ValidationError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = "ValidationError";
+    }
+}
+
+// second append it to the error list
+test.errorList.push(ValidationError);
+
+// now it can be used with: 'e|ValidationError'
+```
   
 The _first method_ (``test.addScript``) is a simple global import which is getting passed to **Puppeteer** (cf. [devdocs.io/puppeteer](https://devdocs.io/puppeteer/)). This can be any classic script tag or ES6 module which provides global access (to the entire HTML page).  
   

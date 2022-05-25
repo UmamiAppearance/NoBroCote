@@ -17,7 +17,7 @@ npm install no-brote-cote --save-dev
 # Usage
 The first step is to create a new ``.js`` file (most likely in your test folder). Inside of this file all that have to be done ist importing the main module ``NoBroCote``.  
     
-**(Psst. No 'time' for reading? Jump straight to the full [sample code](https://github.com/UmamiAppearance/NoBroCote#Complete-Sample-Code).)**
+**(Psst. No 'time' for reading? Jump straight to a basic [sample code](https://github.com/UmamiAppearance/NoBroCote#Basic-Sample-Code).)**
 
 ## Importing
 ```js

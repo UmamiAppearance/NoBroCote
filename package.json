@@ -38,6 +38,7 @@
     "url-exist": "^3.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.15.0"
+    "eslint": "^8.15.0",
+    "wade": "^0.3.3"
   }
 }

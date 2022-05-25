@@ -141,7 +141,7 @@ To use this as a test for a node package, simply add the line to ``package.json`
 },
 ```
 
-## Complete Sample Code
+## Basic Sample Code
 ```js
 import NoBroCote from "no-bro-cote";
 

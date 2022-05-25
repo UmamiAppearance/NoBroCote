@@ -91,7 +91,8 @@ test.errorList.push(ValidationError);
 
 // now it can be used with: 'e|ValidationError'
 ```
-  
+
+### Importing Scripts and Modules
 The _first method_ (``test.addScript``) is a simple global import which is getting passed to **Puppeteer** (cf. [devdocs.io/puppeteer](https://devdocs.io/puppeteer/)). This can be any classic script tag or ES6 module which provides global access (to the entire HTML page).  
   
 The _second method_ (``test.addImport``) takes ES6 import statements as an input, which become part of one script tag with the test units. Global availability is therefore not necessary.

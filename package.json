@@ -1,6 +1,6 @@
 {
   "name": "no-bro-cote",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Node Browser Code testing. Run unit tests on your JavaScript code for the browser.",
   "main": "./src/no-bro-cote.js",
   "type": "module",
@@ -8,6 +8,10 @@
     "node": true,
     "commonjs": true,
     "es6": true
+  },
+  "directories": {
+    "src": "./src",
+    "test": "./test"
   },
   "scripts": {
     "test": "node --no-deprecation test/self.test.js",

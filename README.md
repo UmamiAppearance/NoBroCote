@@ -7,6 +7,16 @@
   
 **NoBroCote** is designed for the automation of testing JavaScript code which is made for the browser. It provides methods to run the code units inside of a headless browser via [Puppeteer](https://github.com/puppeteer/puppeteer). **NoBroCote** makes it possible to test the code via node, without having to open a browser, and also without writing the test environment from scratch every time. It is as simple as it gets up to this point. More feature may follow.
 
+## Use case
+This software is designed to test if an application for the browser is correctly working.
+ - Is it loading into the HTML page?
+ - is it creating the required dom elements?
+ - It is responding?
+ - It it serving the correct output?
+ - ...
+
+_It is not suitable for UI tests_, reacting to (touch) input and anything like that, or testing if the code is running consistent over different browsers.
+
 # Installation
 **NoBroCote** is made for unit tests with node.js, therefore a installation via npm is advisable. As it is most likely is only needed for testing with the ``--save-dev`` flag.
 
@@ -42,7 +52,7 @@ After initialization it is time to create a test unit. A test unit takes:
 The function has access to the html page. It acts like a single function you would execute in a script tag. It has access to all scripts and modules passed via ``addScript`` or ``addImport``. The function can be asynchronous or not. It must return something which can be compared with the expected result.  
 **Example:**  
 
- ```js
+```js
 test.makeUnit(
     "myFirstUnit",
     "hello",
@@ -51,10 +61,10 @@ test.makeUnit(
         return document.body.textContent;
     }
 );
- ```
+```
 
 #### Controlling the Test Assertion
-The regular assertion. Compares the expected value and the result for equality without type conversion (===). If this is not the desired behavior, there are some operators available to control the assertion process. Oparators are activated by passing them to the expect parameter of a ``makeUnit`` method.  
+The regular assertion compares the expected value and the result for equality without type conversion (===). If this is not the desired behavior, there are some operators available to control the assertion process. Oparators are activated by passing them to the expect parameter of a ``makeUnit`` method.  
   
 _Available operators are:_
  -  ``!|`` not
@@ -62,18 +72,55 @@ _Available operators are:_
  -  ``||`` or, values can be separated with: valueA|valueB|valueC
  - ``==|`` equality, with type conversion
 
+**Examples:**
+```js
+test.makeUnit(
+    "notTest",
+    "!|cat",
+    () => {
+        
+        document.body.textContent = "dog";
+        return document.body.textContent;
+    }
+);
+
+test.makeUnit(
+    "orTest",
+    "||cat|dog|bird",
+    () => {
+        const pickPet = () => ["cat", "dog", "bird"].at(Math.floor(Math.random()*3));
+        document.body.textContent = pickPet();
+        return document.body.textContent;
+    }
+);
+```
+
 
 #### Controlling Errors
 Sometimes it is necessary to test if an error is thrown. The test should throw the error, but that is the desired behavior not a failure. Similar to the just featured operators there are operators for errors (those keywords are also passed to the expect parameter).
 _Those are:_
  - ``e|`` (for allowing all errors)
  - ``e|EvalError``
- - ``e|InternalError``
+ - ``e|InternalError``// optional
  - ``e|RangeError``
  - ``e|ReferenceError``
  - ``e|SyntaxError``
  - ``e|TypeError``
  - ``e|URIError``
+
+**Example:**
+
+```js
+test.makeUnit(
+    "expectErrorTest",
+    "e|TypeError",
+    () => {
+        throw new TypeError("I am glad this error was raised!");
+    }
+);
+```
+
+
 
 ##### Custom Errors
 Custom errors can be also be added to error list:
@@ -81,13 +128,13 @@ Custom errors can be also be added to error list:
 // first create the error, eg:
 class ValidationError extends Error {
     constructor(message) {
-      super(message);
-      this.name = "ValidationError";
+        super(message);
+        this.name = "ValidationError";
     }
 }
 
 // second append it to the error list
-test.errorList.push(ValidationError);
+test.errorList.push(ValidationError.name);
 
 // now it can be used with: 'e|ValidationError'
 ```
@@ -147,12 +194,11 @@ import NoBroCote from "no-bro-cote";
 
 const test = new NoBroCode(import.meta.url);
 
-// optional
+// imports (optional)
 test.addScript({
     path: "./path/to/script"
 });
 
-// optional
 test.addImport('import myModule from "./path/to/module"');
 
 
@@ -167,11 +213,19 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "mySecondUnit",
-    "world",
+    "myNotUnit",
+    "!|hello",
     async () => {
         document.body.textContent = "world";
         return document.body.textContent;
+    }
+);
+
+test.makeUnit(
+    "myExpectErrorUnit",
+    "e|ReferenceError",
+    () => {
+        const thisIsPython = False;
     }
 );
 

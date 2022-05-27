@@ -12,7 +12,7 @@ This software is designed to test if an application for the browser is correctly
  - Is it loading into the HTML page?
  - Is it creating the required DOM elements?
  - It is responding?
- - It it serving the correct output?
+ - Is it serving the correct output?
  - etc.
 
 _It is not suitable for UI tests_, reacting to (touch) input and anything like that, or testing if the code is running consistent over different browsers.

@@ -18,6 +18,16 @@ testSuccess.makeUnit(
 );
 
 testSuccess.makeUnit(
+    "orTest",
+    "||cat|dog|bird",
+    () => {
+        const pickPet = () => ["cat", "dog", "bird"].at(Math.floor(Math.random()*3));
+        document.body.textContent = pickPet();
+        return document.body.textContent;
+    }
+);
+
+testSuccess.makeUnit(
     "useRegularScript",
     1,
     () => {
@@ -74,6 +84,29 @@ testSuccess.makeUnit(
     async () => {
         document.body.textContent = "dog";
         return document.body.textContent;
+    }
+);
+
+testSuccess.makeUnit(
+    "expectErrorTest",
+    "e|TypeError",
+    () => {
+        throw new TypeError("I am glad this error was raised!");
+    }
+);
+
+class ValidationError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "ValidationError";
+    }
+}
+testSuccess.errorList.push(ValidationError.name);
+testSuccess.makeUnit(
+    "customError",
+    "e|ValidationError",
+    () => {
+        throw new ValidationError("Invalid!");
     }
 );
 

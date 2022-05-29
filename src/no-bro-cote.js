@@ -66,6 +66,9 @@ class NoBroCote {
         this.additionalScripts = new Array();
         this.imports = new Array();
         this.units = new Object();
+
+        // set port
+        this.port = 9999;
     }
 
 
@@ -246,7 +249,7 @@ class NoBroCote {
         [content, relClassPath] = await this.#compileServerVars();
 
         const server = await import("../src/server.js");
-        this.server = new server.NoBroCoteHTMLServer(relClassPath);
+        this.server = new server.NoBroCoteHTMLServer(relClassPath, this.port);
 
         const result = await this.server.run(content, this.additionalScripts);
 

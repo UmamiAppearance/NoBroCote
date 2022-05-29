@@ -22,8 +22,8 @@ class NoBroCoteHTMLServer {
      * NoBroCote main class must be passed to it.
      * @param {string} relClassPath - Path of NoBoCote Class 
      */
-    constructor(relClassPath) {
-        this.port = 9999;
+    constructor(relClassPath, port) {
+        this.port = port;
         this.tests = null;
         this.relClassPath = relClassPath;
 

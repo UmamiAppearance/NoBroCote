@@ -1,7 +1,7 @@
 /*
  * [NoBroCote|HTML Server]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.1.2
+ * @version 0.1.3
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
@@ -22,8 +22,8 @@ class NoBroCoteHTMLServer {
      * NoBroCote main class must be passed to it.
      * @param {string} relClassPath - Path of NoBoCote Class 
      */
-    constructor(relClassPath) {
-        this.port = 9999;
+    constructor(relClassPath, port) {
+        this.port = port;
         this.tests = null;
         this.relClassPath = relClassPath;
 

@@ -11,7 +11,7 @@
 This software is designed to test if an application for the browser is correctly working.
  - Is it loading into the HTML page?
  - Is it creating the required DOM elements?
- - It is responding?
+ - Is it responding?
  - Is it serving the correct output?
  - etc.
 
@@ -98,7 +98,7 @@ test.makeUnit(
 
 #### Controlling Errors
 Sometimes it is necessary to test if an error is thrown. The test should throw the error, but that is the desired behavior not a failure. Similar to the just featured operators there are operators for errors (those keywords are also passed to the expect parameter).
-_Those are:_
+_Those are:
  - ``e|`` (for allowing all errors)
  - ``e|EvalError``
  - ``e|InternalError``// optional
@@ -167,6 +167,12 @@ This method provides ES6 imports for the test runner. In contrast to ``addScript
 ```js
 test.addImport('import myModule from "./path/to/module"');
  ```
+
+### Server Port
+By default the server runs on port ``9999``. This can be changed, if this does not fit the needs. Simply declare another port, **eg:**
+```js
+test.port = 8080;
+```
 
 ### Running the Tests
 What to do to actually run the tests? _Not much._ After all imports are done and all units are declared all that is left to to is to set at the end of the file the following line:

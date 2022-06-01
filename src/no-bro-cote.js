@@ -1,7 +1,7 @@
 /*
  * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.1.3
+ * @version 0.1.4
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */

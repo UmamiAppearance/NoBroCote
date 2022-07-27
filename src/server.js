@@ -1,7 +1,7 @@
 /*
  * [NoBroCote|HTML Server]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.1.3
+ * @version 0.1.4
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
@@ -94,11 +94,14 @@ class NoBroCoteHTMLServer {
         page.on("console", async msg => {
             const argJoinFN = async () => {
                 const msgArray = [];
-                msg._args.forEach(async (arg) => msgArray.push(`${await arg.jsonValue()}`));
+                if (msg._args) {
+                    msg._args.forEach(async (arg) => msgArray.push(`${await arg.jsonValue()}`));
+                }
                 return msgArray;
             };
 
-            console.log("    > log: " + (await argJoinFN()).join(" "));
+            const args = (await argJoinFN()).join(" ");
+            if (args) console.log("    > log: " + args);
         });
 
         await page.goto(`http://127.0.0.1:${this.port}/`);

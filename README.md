@@ -98,7 +98,7 @@ test.makeUnit(
 
 #### Controlling Errors
 Sometimes it is necessary to test if an error is thrown. The test should throw the error, but that is the desired behavior not a failure. Similar to the just featured operators there are operators for errors (those keywords are also passed to the expect parameter).
-_Those are:_
+_Those are:
  - ``e|`` (for allowing all errors)
  - ``e|EvalError``
  - ``e|InternalError``// optional

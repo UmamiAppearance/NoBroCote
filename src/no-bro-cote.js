@@ -1,7 +1,7 @@
-/*
+/**
  * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.1.3
+ * @version 0.1.4
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
@@ -119,9 +119,11 @@ class NoBroCote {
         }
 
         if (typeof imports === "string") {
-            this.imports.push(imports);
+            this.imports.push(imports.replace(/(["`])/g, "'"));
         } else if (Array.isArray(imports)) {
-            this.imports.push(...imports);
+            for (const imp of imports) {
+                this.imports.push(imp.replace(/(["`])/g, "'"));
+            }
         } else {
             throw new TypeError("Imports must be a string or an array of strings.");
         }
@@ -332,7 +334,7 @@ class NoBroCote {
         // test import paths
         for (const statement of this.imports) {
             // eslint-disable-next-line quotes
-            const pathMatch = statement.replaceAll('"', '"').split("'");
+            const pathMatch = statement.split("'");
             if (pathMatch.length < 2) {
                 throw new Error(`Cannot find a path in import statement '${statement}'`);
             }

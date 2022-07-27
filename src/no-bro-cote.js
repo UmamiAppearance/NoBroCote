@@ -1,4 +1,4 @@
-/*
+/**
  * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
  * @version 0.1.4

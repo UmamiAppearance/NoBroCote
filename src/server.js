@@ -22,7 +22,7 @@ class NoBroCoteHTMLServer {
      * NoBroCote main class must be passed to it.
      * @param {number} port - Port 
      */
-    constructor(port) {
+    constructor(port, htmlFile) {
         this.port = port;
         this.tests = null;
 
@@ -38,7 +38,7 @@ class NoBroCoteHTMLServer {
             
             let filePath;
             if (request.url === "/") {
-                filePath = "./src/barebone.html"; // TODO: Test for path problems (should point to relative barbone file)
+                filePath = htmlFile;
                 console.log("  + opening html test page");
             } else {
                 console.log(`  + importing ${request.url.split("/")[2]}`);
@@ -89,6 +89,9 @@ class NoBroCoteHTMLServer {
         await browser.createIncognitoBrowserContext();
         
         const page = await browser.newPage();
+
+        // set timeout to 500 ms (which is plenty of time for local server)
+        page.setDefaultNavigationTimeout(500);
     
         page.on("console", async msg => {
             const argJoinFN = async () => {

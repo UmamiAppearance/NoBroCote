@@ -69,6 +69,9 @@ class NoBroCote {
 
         // set port
         this.port = 9999;
+
+        // set html page
+        this.htmlPage = null;
     }
 
 
@@ -250,7 +253,7 @@ class NoBroCote {
         const content = await this.#compileServerVars();
 
         const server = await import("../src/server.js");
-        this.server = new server.NoBroCoteHTMLServer(this.port);
+        this.server = new server.NoBroCoteHTMLServer(this.port, this.htmlPage);
 
         const result = await this.server.run(content, this.additionalScripts);
 
@@ -297,6 +300,7 @@ class NoBroCote {
 
         // get path relative to root
         const relClassPath = classFilePath.replace(this.rootDir, "");
+
         if (relClassPath.length === classFilePath) {
             throw new Error(`Unable to set relative import path. Is NoBroCote a subfolder of root directory '${this.rootDir}'?`);
         }
@@ -362,8 +366,9 @@ class NoBroCote {
         const imports = this.imports.join("\n");
         content = `\n${imports}\n${content}\nwindow.testInstance = ${instanceVar};\n`;
 
-        console.log(content);
-
+        if (!this.htmlPage) {
+            this.htmlPage = "." + relClassPath.replace(classFileName, "barebone.html");
+        }
         return content;
     }
 

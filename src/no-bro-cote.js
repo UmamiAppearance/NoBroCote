@@ -177,7 +177,7 @@ class NoBroCote {
      * or 'addImport'.
      * 
      * The function can be asynchronous or not. It must return 
-     * something which can be compared with the expected result.
+     * something which can NoBroCoteHTMLServer compared with the expected result.
      * 
      * @param {string} name - Unit Name
      * @param {*} expect - expected result 
@@ -247,11 +247,10 @@ class NoBroCote {
             return;
         }
         
-        let content, relClassPath;
-        [content, relClassPath] = await this.#compileServerVars();
+        const content = await this.#compileServerVars();
 
         const server = await import("../src/server.js");
-        this.server = new server.NoBroCoteHTMLServer(relClassPath, this.port);
+        this.server = new server.NoBroCoteHTMLServer(this.port);
 
         const result = await this.server.run(content, this.additionalScripts);
 
@@ -363,7 +362,9 @@ class NoBroCote {
         const imports = this.imports.join("\n");
         content = `\n${imports}\n${content}\nwindow.testInstance = ${instanceVar};\n`;
 
-        return [content, relClassPath];
+        console.log(content);
+
+        return content;
     }
 
 

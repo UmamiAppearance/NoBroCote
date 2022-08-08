@@ -20,12 +20,11 @@ class NoBroCoteHTMLServer {
     /**
      * Creates the puppeteer instance. The path of
      * NoBroCote main class must be passed to it.
-     * @param {string} relClassPath - Path of NoBoCote Class 
+     * @param {number} port - Port 
      */
-    constructor(relClassPath, port) {
+    constructor(port) {
         this.port = port;
         this.tests = null;
-        this.relClassPath = relClassPath;
 
         // http server
         this.mimeTypes = {
@@ -39,7 +38,7 @@ class NoBroCoteHTMLServer {
             
             let filePath;
             if (request.url === "/") {
-                filePath = `.${this.relClassPath}`;
+                filePath = "./src/barebone.html"; // TODO: Test for path problems (should point to relative barbone file)
                 console.log("  + opening html test page");
             } else {
                 console.log(`  + importing ${request.url.split("/")[2]}`);
@@ -120,7 +119,7 @@ class NoBroCoteHTMLServer {
 
         console.log("  + preparing empty page body");
         await page.evaluate(() => document.body.innerHTML = "");
-
+        
         // add additional scripts
         for (const scriptObj of additionalScripts) {
             await page.addScriptTag(scriptObj);

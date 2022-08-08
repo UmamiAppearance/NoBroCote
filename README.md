@@ -221,10 +221,11 @@ test.makeUnit(
 test.makeUnit(
     "myNotUnit",
     "!|hello",
-    async () => {
-        document.body.textContent = "world";
+    async (argExample) => {
+        document.body.textContent = argExample;
         return document.body.textContent;
-    }
+    },
+    "world"
 );
 
 test.makeUnit(

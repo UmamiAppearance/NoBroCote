@@ -3,6 +3,9 @@
   "version": "0.2.0",
   "description": "Node Browser Code testing. Run unit tests on your JavaScript code for the browser.",
   "main": "./src/no-bro-cote.js",
+  "bin": {
+    "no-bro-cote": "//TODO"
+  },
   "type": "module",
   "env": {
     "node": true,

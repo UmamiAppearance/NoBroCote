@@ -94,14 +94,26 @@ class NoBroCoteHTMLServer {
         page.on("console", async msg => {
             const argJoinFN = async () => {
                 const msgArray = [];
-                if (msg._args) {
-                    msg._args.forEach(async (arg) => msgArray.push(`${await arg.jsonValue()}`));
+                
+                for (const arg of msg.args()) {
+
+                    let val;
+                    try {
+                        val = await arg.jsonValue();
+                    } catch {
+                        //
+                    }
+
+                    if (val) {
+                        msgArray.push(val);
+                    }
                 }
+
                 return msgArray;
             };
-
-            const args = (await argJoinFN()).join(" ");
-            if (args) console.log("    > log: " + args);
+            
+            const logList = await argJoinFN();
+            if (logList) console.log("    > log: " + logList.join(" "));
         });
 
         await page.goto(`http://127.0.0.1:${this.port}/`);

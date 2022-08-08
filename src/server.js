@@ -103,10 +103,10 @@ class NoBroCoteHTMLServer {
                     try {
                         val = await arg.jsonValue();
                     } catch {
-                        //
+                        val = "__unset__";
                     }
 
-                    if (val) {
+                    if (val !== "__unset__") {
                         msgArray.push(val);
                     }
                 }
@@ -118,11 +118,9 @@ class NoBroCoteHTMLServer {
             if (logList) console.log("    > log: " + logList.join(" "));
         });
 
+        // open html test page (htmlFile @constructor)
         await page.goto(`http://127.0.0.1:${this.port}/`);
 
-        console.log("  + preparing empty page body");
-        await page.evaluate(() => document.body.innerHTML = "");
-        
         // add additional scripts
         for (const scriptObj of additionalScripts) {
             await page.addScriptTag(scriptObj);

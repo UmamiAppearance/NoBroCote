@@ -17,6 +17,7 @@
 // import urlExist from "url-exist";
 // -------------------------------------------------- //
 
+// TODO: replace all match to test
 
 /**
  * Main class. Instances of this class are hybrids
@@ -166,6 +167,7 @@ class NoBroCote {
         else if (result !== expect) {
             error();
         }
+
     }
 
 
@@ -194,7 +196,7 @@ class NoBroCote {
         }
 
         this.units[name] = async () => {
-            let result;
+            let result = "__unset__";
             const inputStr = `Function: '${fn.name ? fn.name : "anonymous"}', Arguments: ${fnArgs.length ? fnArgs.join(", ") : "none"}`;
             
             try {
@@ -204,7 +206,7 @@ class NoBroCote {
                 
                 let throwErr = true;
                 
-                if (String(expect).match(/^e|/)) {
+                if (String(expect).match(/^e\|/)) {
                     const errType = expect.replace(/^(e\|)/, "");
                     if (this.errorList.includes(errType) && (errType === "" || err.name === errType)) {
                         throwErr = false;
@@ -216,7 +218,9 @@ class NoBroCote {
                 }
             }
 
-            if (result) this.#assert(result, expect, name, inputStr);
+            if (result !== "__unset__") {
+                this.#assert(result, expect, name, inputStr);
+            }
         };
     }
 

@@ -29,7 +29,15 @@ class NoBroCoteHTMLServer {
         // http server
         this.mimeTypes = {
             html: "text/html",
-            js: "text/javascript"
+            htm:  "text/html",
+            jpeg: "image/jpeg",
+            jpg:  "image/jpeg",
+            png:  "image/png",
+            svg:  "image/svg+xml",
+            json: "application/json",
+            js:   "text/javascript",
+            mjs:  "text/javascript",
+            css:  "text/css"
         };
 
         this.socket;
@@ -41,11 +49,11 @@ class NoBroCoteHTMLServer {
                 filePath = htmlFile;
                 console.log("  + opening html test page");
             } else {
-                console.log(`  + importing ${request.url.split("/")[2]}`);
+                console.log(`  + importing ${request.url.split("/").at(-1)}`);
                 filePath = `.${request.url}`;
             }
 
-            const contentType = this.mimeTypes[filePath.split(".").pop()];
+            const contentType = this.mimeTypes[filePath.split(".").at(-1)];
 
 
             readFile(filePath, (error, content) => {
@@ -90,8 +98,8 @@ class NoBroCoteHTMLServer {
         
         const page = await browser.newPage();
 
-        // set timeout to 500 ms (which is plenty of time for local server)
-        page.setDefaultNavigationTimeout(500);
+        // set timeout to 1000 ms (which is plenty of time for local server)
+        page.setDefaultNavigationTimeout(1000);
     
         page.on("console", async msg => {
             const argJoinFN = async () => {
@@ -118,6 +126,8 @@ class NoBroCoteHTMLServer {
             if (logList) console.log("    > log: " + logList.join(" "));
         });
 
+        page.on("pageerror", ({ message }) => console.error("    > ERROR: " + message));
+
         // open html test page (htmlFile @constructor)
         await page.goto(`http://127.0.0.1:${this.port}/`);
 
@@ -128,8 +138,8 @@ class NoBroCoteHTMLServer {
         
         console.log("  + appending test group");
         await page.addScriptTag({type: "module", content: script});
-        
-        // wait for test instance to be ready
+
+        // wait for test instance to be read
         await page.waitForFunction("typeof window.testInstance !== 'undefined'");
 
         console.log("  + running test functions");

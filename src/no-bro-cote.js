@@ -7,18 +7,6 @@
  */
 
 
-// Imports are are dynamically added. Just as a reminder, 
-// they are listed here:
-// -------------------------------------------------- //
-// import { NoBroCoteHTMLServer } from "./server.js";
-// import { readFileSync } from "fs";
-// import { path } from "path";
-// import { fileURLToPath } from "url";
-// import urlExist from "url-exist";
-// -------------------------------------------------- //
-
-// TODO: replace all match to test
-
 /**
  * Main class. Instances of this class are hybrids
  * of prototypes for creating unit tests and are
@@ -57,7 +45,7 @@ class NoBroCote {
 
         // true if first called by node, false during tests 
         this.initialize = typeof window === "undefined";
-        
+
         // store project root for initialization
         if (this.initialize) {
             this.rootDir = process.cwd();
@@ -147,20 +135,20 @@ class NoBroCote {
     #assert(result, expect, unit, input) {
         const error = () => this.#makeError(input, result, expect, unit);
 
-        if (String(expect).match(/^!\|/)) { 
+        if ((/^!\|/).test(String(expect))) { 
             if (result === expect.replace(/^!\|/, "")) error();
         }
         
-        else if (String(expect).match(/^!=\|/)) {
+        else if ((/^!=\|/).test(String(expect))) {
             if (result == expect.replace(/^!=\|/, "")) error();
         }
         
-        else if (String(expect).match(/^\|\|/)) {
+        else if ((/^\|\|/).test(String(expect))) {
             const valid = expect.split("|").slice(2);
             if (!valid.includes(result)) error();
         }
 
-        else if (String(expect).match(/^==\|/)) {
+        else if ((/^==\|/).test(String(expect))) {
             if (result != expect.replace(/^==\|/, "")) error();
         }
         
@@ -206,7 +194,7 @@ class NoBroCote {
                 
                 let throwErr = true;
                 
-                if (String(expect).match(/^e\|/)) {
+                if ((/^e\|/).test(String(expect))) {
                     const errType = expect.replace(/^(e\|)/, "");
                     if (this.errorList.includes(errType) && (errType === "" || err.name === errType)) {
                         throwErr = false;
@@ -289,17 +277,24 @@ class NoBroCote {
     async #compileServerVars() {
         
         // import libraries
-        const fs = await import("fs");
-        const path = await import("path");
-        const url = await import("url");
+        const { access, readFileSync, F_OK } = await import("fs");
+        const { join } = await import("path");
+        const { fileURLToPath } = await import("url");
+        const { ImportManager } = await import("rollup-plugin-import-manager");
         const { default: urlExist }  = await import("url-exist");
 
+        // test if top level
+        const topLevel = /^file/.test(this.fileName);
 
         // get path of script
-        const instanceFilePath = url.fileURLToPath(this.fileName);
+        const instanceFilePath = topLevel ? fileURLToPath(this.fileName) : this.fileName;
 
         // get path of this class
-        const classFilePath = url.fileURLToPath(import.meta.url);
+        let classFilePath = fileURLToPath(import.meta.url);
+        
+        if (!topLevel) {
+            classFilePath = classFilePath.replace("no-bro-cote.js", "index.js");
+        }
         const classFileName = classFilePath.split("/").at(-1);
 
         // get path relative to root
@@ -319,24 +314,26 @@ class NoBroCote {
         let dirDots = (stepsToRoot) ? "../".repeat(stepsToRoot).slice(0,-1) : ".";
 
         // get content
-        let content = fs.readFileSync(instanceFilePath).toString();
+        let content = readFileSync(instanceFilePath).toString();
         
-        // replace import statement ([node] or relative [file])
-        // TODO: the replacement of the relative path is most
-        // likely redundant -> confirm that
-        const regexpNode = new RegExp("^import.*no-bro-cote.*$", "m");
-        const regexpFile = new RegExp(`^import.*${classFileName}.*$`, "m");
-        const importStatement = `import NoBroCote from "${dirDots}${relClassPath}";`;
-        content = content
-            .replace(regexpNode, importStatement)
-            .replace(regexpFile, importStatement);
-
+        // adjust import statements to relative local statements
+        const importManager = new ImportManager(content, classFilePath);
+        const statement = importManager.selectModByName("no-bro-cote");
+        statement.methods.renameModule(`${dirDots}${relClassPath}`, "string");
+        importManager.commitChanges(statement);
+        content = importManager.code.toString();
+        
         // find instance variable
-        const varMatch = content.match(/.*(?=\s?=\s?new NoBroCote)/m);
-        if (!varMatch) {
-            throw new Error(`Could not find instance filename in ${relInstancePath}`);
+        let instanceVar;
+        if (topLevel) {
+            const varMatch = content.match(/.*(?=\s?=\s?new NoBroCote)/m);
+            if (!varMatch) {
+                throw new Error(`Could not find instance filename in ${relInstancePath}`);
+            }
+            instanceVar = varMatch[0].trim().split(/\s/).at(-1);
+        } else {
+            instanceVar = "test";
         }
-        const instanceVar = varMatch[0].trim().split(/\s/).at(-1);
 
         // test import paths
         for (const statement of this.imports) {
@@ -348,7 +345,7 @@ class NoBroCote {
             const destination = pathMatch[1];
 
             // handle urls
-            if (destination.match(/^(?:http(s)?:\/\/)/)) {
+            if ((/^(?:http(s)?:\/\/)/).test(destination)) {
 
                 if (!(await urlExist(destination))) {
                     throw new Error(`URL '${destination}' cannot be resolved`);
@@ -357,9 +354,9 @@ class NoBroCote {
 
             // handle relative imports
             else {
-                const importPath = path.join(this.rootDir, destination);
+                const importPath = join(this.rootDir, destination);
                 
-                fs.access(importPath, fs.F_OK, (err) => {
+                access(importPath, F_OK, (err) => {
                     if (err) {
                         throw new Error(`Cannot resolve path '${importPath}'`);
                     }
@@ -373,6 +370,7 @@ class NoBroCote {
         if (!this.htmlPage) {
             this.htmlPage = "." + relClassPath.replace(classFileName, "barebone.html");
         }
+
         return content;
     }
 

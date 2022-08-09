@@ -126,7 +126,7 @@ class NoBroCoteHTMLServer {
             if (logList) console.log("    > log: " + logList.join(" "));
         });
 
-        page.on("pageerror", ({ message }) => console.error("    > ERROR: " + message));
+        page.on("pageerror", ({ message }) => console.error(`    > PAGE_ERROR:\n---\n${message}\n`));
 
         // open html test page (htmlFile @constructor)
         await page.goto(`http://127.0.0.1:${this.port}/`);

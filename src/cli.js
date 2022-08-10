@@ -57,22 +57,16 @@ console.log(fileList);
 
 const forkPromise = (modulePath) => {
     return new Promise((resolve, reject) => {
-        try {
-            fork(modulePath)
-                .on("close", (code) => resolve(code))
-                .on("error", err => {
-                    throw new Error(err.message);
-                });
-        } catch (e) {
-            reject(e);
-        }
+        fork(modulePath)
+            .on("close", exitCode => resolve(exitCode))
+            .on("error", error => reject(error));
     });
 };
 
-const tests = [];
-for (const testFile of fileList) {
-    tests.push(forkPromise(testFile));
-}
+const exitCodes = await Promise.all(
+    fileList.map(testFile => forkPromise(testFile))
+);
 
-const end = await Promise.all(tests);
-console.log("END", end);
+const exitCode = exitCodes.some(code => code !== 0)|0;
+
+process.exit(exitCode);

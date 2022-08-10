@@ -260,9 +260,6 @@ class NoBroCote {
         if (result.errors) {
             console.error(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`);
             exitCode = 1;
-        } 
-        if (exitCode === 0) {
-            console.log("Everything seems to work fine.");
         }
         
         process.exit(exitCode);

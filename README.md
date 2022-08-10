@@ -177,6 +177,11 @@ test.port = 8080;
 ### HTML file
 TODO
 
+### expectFailure
+TODO
+
+### adjustModules
+TODO
 
 ### Running the Tests
 What to do to actually run the tests? _Not much._ After all imports are done and all units are declared all that is left to to is to set at the end of the file the following line:

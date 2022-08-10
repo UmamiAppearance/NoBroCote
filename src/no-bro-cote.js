@@ -57,7 +57,7 @@ class NoBroCote {
         this.units = new Object();
 
         // set port
-        this.port = 9999;
+        this.port = 10000;
 
         // set html page
         this.htmlPage = null;
@@ -254,11 +254,13 @@ class NoBroCote {
             delete result.errorMessages;
         }
 
-        console.log("-------\nresults");
-        console.log(JSON.stringify(result, null, 4));
+        console.log(`-------\nresults ${JSON.stringify(result, null, 4)}`);
 
-        if (result.errors) {
+        if (result.errors && !this.expectFailure) {
             console.error(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`);
+            exitCode = 1;
+        } else if (!result.errors && this.expectFailure) {
+            console.error("Failures were expected, but no errors were thrown.");
             exitCode = 1;
         }
         

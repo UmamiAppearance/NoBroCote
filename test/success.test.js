@@ -9,7 +9,7 @@ test.addScript({path: "./node_modules/wade/dist/wade.min.js"});
 test.addImport("import { appendix } from './test/fixtures/testlibs/appendix.js';");
 
 test.makeUnit(
-    "defaultExample",
+    "default example",
     "true",
     () => {
         document.body.textContent = "true";
@@ -18,7 +18,7 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "orTest",
+    "or test",
     "||cat|dog|bird",
     () => {
         const pickPet = () => ["cat", "dog", "bird"].at(Math.floor(Math.random()*3));
@@ -28,7 +28,7 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "useRegularScript",
+    "regular script tag",
     1,
     () => {
         // eslint-disable-next-line no-undef
@@ -40,7 +40,7 @@ test.makeUnit(
 
 
 test.makeUnit(
-    "testRelativeImport",
+    "relative import",
     "wow",
     async () => {
         // eslint-disable-next-line no-undef
@@ -51,7 +51,7 @@ test.makeUnit(
 
 
 test.makeUnit(
-    "convertTypeExample",
+    "convert type example",
     "==|42",
     async () => {
         document.body.textContent = "42";
@@ -61,7 +61,7 @@ test.makeUnit(
 
 
 test.makeUnit(
-    "notExample",
+    "not example",
     "!|dog",
     () => {
         document.body.textContent = "cat";
@@ -70,7 +70,7 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "notWithTypeConversionExample",
+    "not - with type conversion",
     "!=|42",
     () => {
         document.body.textContent = "4.2";
@@ -78,17 +78,9 @@ test.makeUnit(
     }
 );
 
-test.makeUnit(
-    "orExample",
-    "||cat|dog|bird",
-    async () => {
-        document.body.textContent = "dog";
-        return document.body.textContent;
-    }
-);
 
 test.makeUnit(
-    "expectErrorTest",
+    "expect error",
     "e|TypeError",
     () => {
         throw new TypeError("I am glad this error was raised!");
@@ -103,7 +95,7 @@ class ValidationError extends Error {
 }
 test.errorList.push(ValidationError.name);
 test.makeUnit(
-    "customError",
+    "custom error",
     "e|ValidationError",
     () => {
         throw new ValidationError("Invalid!");
@@ -111,7 +103,7 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "exceptionExample",
+    "exception example",
     "e|ReferenceError",
     () => {
         // eslint-disable-next-line no-undef

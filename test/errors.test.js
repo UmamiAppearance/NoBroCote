@@ -1,9 +1,10 @@
 import { test } from "../src/index.js";
 
 test.adjustModules = false;
+test.expectFailure = true;
 
 test.makeUnit(
-    "defaultExample",
+    "default example",
     "false",
     () => {
         document.body.textContent = "true";
@@ -12,7 +13,7 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "noConvertTypeExample",
+    "no convert type example",
     "42",
     async () => {
         document.body.textContent = "42";
@@ -22,7 +23,7 @@ test.makeUnit(
 
 
 test.makeUnit(
-    "notExample",
+    "not example",
     "!|dog",
     () => {
         document.body.textContent = "dog";
@@ -31,7 +32,7 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "notWithTypeConversionExample",
+    "not - with type conversion",
     "!=|42",
     () => {
         document.body.textContent = "42";
@@ -40,7 +41,7 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "orExample",
+    "or example",
     "||cat|dog|bird",
     async () => {
         document.body.textContent = "fish";
@@ -49,7 +50,7 @@ test.makeUnit(
 );
 
 test.makeUnit(
-    "exceptionExample",
+    "exception example",
     "e|TypeError",
     () => {
         // eslint-disable-next-line no-undef

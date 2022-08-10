@@ -6,7 +6,7 @@ const testSuccess = new NoBroCote(import.meta.url);
 testSuccess.addScript({path: "./node_modules/wade/dist/wade.min.js"});
 
 // test injection relative module
-testSuccess.addImport("import { appendix } from './test/testlibs/appendix.js';");
+testSuccess.addImport("import { appendix } from './test/fixtures/testlibs/appendix.js';");
 
 testSuccess.makeUnit(
     "defaultExample",

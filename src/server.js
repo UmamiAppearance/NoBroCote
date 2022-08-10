@@ -75,12 +75,22 @@ class NoBroCoteHTMLServer {
             });
         });
 
+        this.server.on("error", e => {
+            if (e.code === "EADDRINUSE") {
+                this.port ++;
+                this.server.listen(this.port);
+            } else {
+                throw e;
+            }
+        });
+
         this.terminateServer = async () => {
             if (this.socket) this.socket.destroy();
             this.server.close();
         };
 
     }
+
 
     /**
      * Test Runner. Called after everything is initialized.
@@ -89,8 +99,9 @@ class NoBroCoteHTMLServer {
      * @returns 
      */
     async run(script, additionalScripts) {
+        
+        console.log("- spinning up local http test server");
         this.server.listen(this.port);
-        console.log(`- spinning up local http test server at "127.0.0.1:${this.port}/"`);
 
         console.log("- running tests:");
         const browser = await puppeteer.launch();

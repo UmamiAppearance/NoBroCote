@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+
+import{ fork } from "child_process";
 import { readdirSync, statSync } from "fs";
 import { join as joinPath } from "path";
 
@@ -34,7 +37,7 @@ const collectFiles = (dirPath) => {
                 !excludeFileRegex.test(file) &&
                 extensionsRegex.test(file)
             ){
-                const fullPath = joinPath(cwd, dirPath, file);
+                const fullPath = joinPath(dirPath, file);
 
                 if (
                     (/\/tests?\/|__tests__/).test(fullPath) ||
@@ -49,7 +52,27 @@ const collectFiles = (dirPath) => {
 };
 
 collectFiles(cwd);
-
 console.log(fileList);
 
 
+const forkPromise = (modulePath) => {
+    return new Promise((resolve, reject) => {
+        try {
+            fork(modulePath)
+                .on("close", (code) => resolve(code))
+                .on("error", err => {
+                    throw new Error(err.message);
+                });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
+const tests = [];
+for (const testFile of fileList) {
+    tests.push(forkPromise(testFile));
+}
+
+const end = await Promise.all(tests);
+console.log("END", end);

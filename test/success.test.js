@@ -1,14 +1,14 @@
-import NoBroCote from "../src/no-bro-cote.js";
+import { test } from "../src/index.js";
 
-const testSuccess = new NoBroCote(import.meta.url);
+test.adjustModules = false;
 
 // test injection of a regular script tag
-testSuccess.addScript({path: "./node_modules/wade/dist/wade.min.js"});
+test.addScript({path: "./node_modules/wade/dist/wade.min.js"});
 
 // test injection relative module
-testSuccess.addImport("import { appendix } from './test/fixtures/testlibs/appendix.js';");
+test.addImport("import { appendix } from './test/fixtures/testlibs/appendix.js';");
 
-testSuccess.makeUnit(
+test.makeUnit(
     "defaultExample",
     "true",
     () => {
@@ -17,7 +17,7 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
+test.makeUnit(
     "orTest",
     "||cat|dog|bird",
     () => {
@@ -27,7 +27,7 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
+test.makeUnit(
     "useRegularScript",
     1,
     () => {
@@ -39,7 +39,7 @@ testSuccess.makeUnit(
 );
 
 
-testSuccess.makeUnit(
+test.makeUnit(
     "testRelativeImport",
     "wow",
     async () => {
@@ -50,7 +50,7 @@ testSuccess.makeUnit(
 );
 
 
-testSuccess.makeUnit(
+test.makeUnit(
     "convertTypeExample",
     "==|42",
     async () => {
@@ -60,7 +60,7 @@ testSuccess.makeUnit(
 );
 
 
-testSuccess.makeUnit(
+test.makeUnit(
     "notExample",
     "!|dog",
     () => {
@@ -69,7 +69,7 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
+test.makeUnit(
     "notWithTypeConversionExample",
     "!=|42",
     () => {
@@ -78,7 +78,7 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
+test.makeUnit(
     "orExample",
     "||cat|dog|bird",
     async () => {
@@ -87,7 +87,7 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
+test.makeUnit(
     "expectErrorTest",
     "e|TypeError",
     () => {
@@ -101,8 +101,8 @@ class ValidationError extends Error {
         this.name = "ValidationError";
     }
 }
-testSuccess.errorList.push(ValidationError.name);
-testSuccess.makeUnit(
+test.errorList.push(ValidationError.name);
+test.makeUnit(
     "customError",
     "e|ValidationError",
     () => {
@@ -110,7 +110,7 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
+test.makeUnit(
     "exceptionExample",
     "e|ReferenceError",
     () => {
@@ -121,4 +121,4 @@ testSuccess.makeUnit(
 );
 
 
-await testSuccess.init(false);
+test.init();

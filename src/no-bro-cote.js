@@ -317,12 +317,14 @@ class NoBroCote {
         let content = readFileSync(instanceFilePath).toString();
         
         // adjust import statements to relative local statements
-        const importManager = new ImportManager(content, classFilePath);
-        const statement = importManager.selectModByName("no-bro-cote");
-        statement.methods.renameModule(`${dirDots}${relClassPath}`, "string");
-        importManager.commitChanges(statement);
-        content = importManager.code.toString();
-        
+        if (this.adjustModules !== false) {
+            const importManager = new ImportManager(content, classFilePath);
+            const statement = importManager.selectModByName("no-bro-cote");
+            statement.methods.renameModule(`${dirDots}${relClassPath}`, "string");
+            importManager.commitChanges(statement);
+            content = importManager.code.toString();
+        }
+            
         // find instance variable
         let instanceVar;
         if (topLevel) {

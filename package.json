@@ -41,9 +41,10 @@
   },
   "homepage": "https://github.com/UmamiAppearance/NoBroCote#readme",
   "dependencies": {
+    "colorette": "^2.0.19",
     "puppeteer": "^16.1.0",
     "rollup-plugin-import-manager": "^0.2.0",
-    "url-exist": "^3.0.0"
+    "url-exist": "^3.0.1"
   },
   "devDependencies": {
     "eslint": "^8.21.0",

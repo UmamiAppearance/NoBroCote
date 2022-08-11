@@ -9,6 +9,7 @@
 import { createServer } from "http";
 import puppeteer from "puppeteer";
 import { readFile } from "fs";
+import { green, red } from "colorette";
 
 /**
  * HTML Test runner. It contains a http test
@@ -22,8 +23,10 @@ class NoBroCoteHTMLServer {
      * NoBroCote main class must be passed to it.
      * @param {number} port - Port 
      */
-    constructor(port, htmlFile) {
+    constructor(port, htmlFile, group, debug) {
         this.port = port;
+        this.group = group;
+        this.debug = debug;
         this.tests = null;
 
         // http server
@@ -47,9 +50,9 @@ class NoBroCoteHTMLServer {
             let filePath;
             if (request.url === "/") {
                 filePath = htmlFile;
-                console.log("  + opening html test page");
+                if (this.debug) console.log("  + opening html test page");
             } else {
-                console.log(`  + importing ${request.url.split("/").at(-1)}`);
+                if (this.debug) console.log(`  + importing ${request.url.split("/").at(-1)}`);
                 filePath = `.${request.url}`;
             }
 
@@ -58,7 +61,7 @@ class NoBroCoteHTMLServer {
 
             readFile(filePath, (error, content) => {
                 if (error) {
-                    console.error(error);
+                    console.error(red(error));
                     return 1;
                 }
                 response.writeHead(200, { "Content-Type": contentType });
@@ -100,23 +103,26 @@ class NoBroCoteHTMLServer {
      */
     async run(script, additionalScripts) {
         
-        console.log("- spinning up local http test server");
+        if (this.debug) console.log("- spinning up local http test server");
         this.server.listen(this.port);
 
-        console.log("- running tests:");
+        if (this.debug) console.log("- running tests:");
         const browser = await puppeteer.launch();
         await browser.createIncognitoBrowserContext();
         
         const page = await browser.newPage();
 
-        // set timeout to 1000 ms (which is plenty of time for local server)
-        page.setDefaultNavigationTimeout(1000);
+        // set timeout to 3000 ms (which is plenty of time for a local server)
+        page.setDefaultNavigationTimeout(3000);
     
         page.on("console", async msg => {
+
+            let isHeader = false;
+
             const argJoinFN = async () => {
-                const msgArray = [];
-                
-                for (const arg of msg.args()) {
+                let msgArray = [];
+
+                msg.args().forEach(async (arg, i) => {
 
                     let val;
                     try {
@@ -126,18 +132,38 @@ class NoBroCoteHTMLServer {
                     }
 
                     if (val !== "__unset__") {
-                        msgArray.push(val);
+                        if (i === 0 && val === "|HEAD|") {
+                            isHeader = true;
+                        } else {
+                            msgArray.push(val);
+                        }
                     }
-                }
+                });
 
                 return msgArray;
             };
             
             const logList = await argJoinFN();
-            if (logList) console.log("    > log: " + logList.join(" "));
+
+            if (logList) {
+                if (isHeader) {
+                    const symbol = logList[0] ? green("✔") : red("✖");
+                    console.log(
+                        "   ",
+                        symbol,
+                        this.group,
+                        "->",
+                        logList.slice(1).join(" ")
+                    );
+                } else {
+                    console.log(this.group + " log: " + logList.join(" "));
+                }
+            }
         });
 
-        page.on("pageerror", ({ message }) => console.error(`    > PAGE_ERROR:\n---\n${message}\n`));
+        page.on("pageerror", ({ message }) => {
+            console.error(red(`    > PAGE_ERROR:\n---\n${message}\n`));
+        });
 
         // open html test page (htmlFile @constructor)
         await page.goto(`http://127.0.0.1:${this.port}/`);
@@ -147,19 +173,19 @@ class NoBroCoteHTMLServer {
             await page.addScriptTag(scriptObj);
         }
         
-        console.log("  + appending test group");
+        if (this.debug) console.log("  + appending test group");
         await page.addScriptTag({type: "module", content: script});
 
         // wait for test instance to be read
         await page.waitForFunction("typeof window.testInstance !== 'undefined'");
 
-        console.log("  + running test functions");
+        if (this.debug) console.log("  + running test functions");
         const result = await page.evaluate(async () => await window.testInstance.run());
         
         await browser.close();
         await this.terminateServer();
 
-        console.log("- all done\n- shutting down test server");
+        if (this.debug) console.log("- all done\n- shutting down test server");
         
         return result;
     }

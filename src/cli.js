@@ -20,7 +20,6 @@ const extensionsList = [ "\\.js$" ];
 const extensionsRegex = arrayToRegexp(extensionsList);
 
 
-
 const collectFiles = (dirPath) => {
     const files = readdirSync(dirPath);
   
@@ -51,10 +50,6 @@ const collectFiles = (dirPath) => {
     });
 };
 
-collectFiles(cwd);
-console.log(fileList);
-
-
 const forkPromise = (modulePath) => {
     return new Promise((resolve, reject) => {
         fork(modulePath)
@@ -63,10 +58,10 @@ const forkPromise = (modulePath) => {
     });
 };
 
+
+collectFiles(cwd);
 const exitCodes = await Promise.all(
     fileList.map(testFile => forkPromise(testFile))
 );
-
 const exitCode = exitCodes.some(code => code !== 0)|0;
-
 process.exit(exitCode);

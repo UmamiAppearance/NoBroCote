@@ -19,11 +19,14 @@ class NoBroCote {
      * Kindly pass 'import.meta.url'
      * @param {string} fileName - import.meta.url
      */
-    constructor(fileName) {
+    constructor(fileName, debug=false) {
 
         // name of the instance file
         this.fileName = fileName;
-        
+
+        // debugging
+        this.debug = debug;
+
         // results obj for the test runner
         this.results = {
             tests: 0,
@@ -49,6 +52,11 @@ class NoBroCote {
         // store project root for initialization
         if (this.initialize) {
             this.rootDir = process.cwd();
+
+            this.group = this.fileName
+                .split("/").at(-1)
+                .replace(/\.[^/.]+$/, "")
+                .replace(/\.?test-?/, "");
         }
         
         // prepare imports and unit array and object
@@ -133,7 +141,13 @@ class NoBroCote {
      *    ==| equality, with type conversion 
      */
     #assert(result, expect, unit, input) {
-        const error = () => this.#makeError(input, result, expect, unit);
+        
+        let passed = true;
+        
+        const error = () => {
+            this.#makeError(input, result, expect, unit);
+            passed = false;
+        };
 
         if ((/^!\|/).test(String(expect))) { 
             if (result === expect.replace(/^!\|/, "")) error();
@@ -156,6 +170,7 @@ class NoBroCote {
             error();
         }
 
+        return passed;
     }
 
 
@@ -207,7 +222,8 @@ class NoBroCote {
             }
 
             if (result !== "__unset__") {
-                this.#assert(result, expect, name, inputStr);
+                const passed = this.#assert(result, expect, name, inputStr);
+                console.log("|HEAD|", passed, name);
             }
         };
     }
@@ -241,11 +257,18 @@ class NoBroCote {
         if (!this.initialize) {
             return;
         }
+
+        const { red } = await import("colorette");
         
         const content = await this.#compileServerVars();
 
         const server = await import("../src/server.js");
-        this.server = new server.NoBroCoteHTMLServer(this.port, this.htmlPage);
+        this.server = new server.NoBroCoteHTMLServer(
+            this.port,
+            this.htmlPage,
+            this.group,
+            this.debug
+        );
 
         const result = await this.server.run(content, this.additionalScripts);
 
@@ -254,13 +277,29 @@ class NoBroCote {
             delete result.errorMessages;
         }
 
-        console.log(`-------\nresults ${JSON.stringify(result, null, 4)}`);
+        const log = (...args) => {
+            args.unshift(this.group);
+            console.log(...args);
+        };
+
+        const logError = (...args) => {
+            args.unshift(red(this.group));
+            console.log(...args);
+        };
+
+        if (this.debug) {
+            log(`-------\nresults ${JSON.stringify(result, null, 4)}`);
+        }
 
         if (result.errors && !this.expectFailure) {
-            console.error(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`);
+            logError(
+                red(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`)
+            );
             exitCode = 1;
         } else if (!result.errors && this.expectFailure) {
-            console.error("Failures were expected, but no errors were thrown.");
+            logError(
+                red("Failures were expected, but no errors were thrown.")
+            );
             exitCode = 1;
         }
         
@@ -387,8 +426,6 @@ class NoBroCote {
             
             const unitName = unitNames.shift();            
             if (unitName) {
-                const header = `testing unit: '${unitName}'`; 
-                console.log(`${header}:\n      ${"-".repeat(header.length + 5)}`);
                 this.results.tests ++;
                 const unitFN = this.units[unitName];
                 await unitFN();

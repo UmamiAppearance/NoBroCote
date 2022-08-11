@@ -9,7 +9,8 @@
 import { createServer } from "http";
 import puppeteer from "puppeteer";
 import { readFile } from "fs";
-import { green, red } from "colorette";
+import { bold, blue, gray, green, red } from "colorette";
+import { type } from "os";
 
 /**
  * HTML Test runner. It contains a http test
@@ -50,9 +51,9 @@ class NoBroCoteHTMLServer {
             let filePath;
             if (request.url === "/") {
                 filePath = htmlFile;
-                if (this.debug) console.log("  + opening html test page");
+                if (this.debug) this.debugLog(1, "+", ["opening html test page"]);
             } else {
-                if (this.debug) console.log(`  + importing ${request.url.split("/").at(-1)}`);
+                if (this.debug) this.debugLog(1, "+", ["importing", request.url.split("/").at(-1)]);
                 filePath = `.${request.url}`;
             }
 
@@ -94,6 +95,20 @@ class NoBroCoteHTMLServer {
 
     }
 
+    debugLog(indent, sign, args) {
+        const msg = [
+            sign,
+            "(" + this.group + ")",
+            ...args
+        ];
+        
+        if (indent) {
+            msg.unshift(" ".repeat(indent));
+        }
+            
+        console.log(...msg.map(arg => gray(arg)));
+    }
+
 
     /**
      * Test Runner. Called after everything is initialized.
@@ -103,10 +118,10 @@ class NoBroCoteHTMLServer {
      */
     async run(script, additionalScripts) {
         
-        if (this.debug) console.log("- spinning up local http test server");
+        if (this.debug) this.debugLog(0, "-", ["spinning up local http test server"]);
         this.server.listen(this.port);
 
-        if (this.debug) console.log("- running tests:");
+        if (this.debug) this.debugLog(0, "-", ["running tests:"]);
         const browser = await puppeteer.launch();
         await browser.createIncognitoBrowserContext();
         
@@ -121,17 +136,23 @@ class NoBroCoteHTMLServer {
 
             const argJoinFN = async () => {
                 let msgArray = [];
-
+                
                 msg.args().forEach(async (arg, i) => {
 
                     let val;
-                    try {
+                    const { preview, subtype } = arg._remoteObject;
+                    console.error(preview);
+                    if (preview) {
+                        if (subtype === "array") {
+                            val = [];
+                            for (const elem of preview.properties) {
+                                console.error(elem);
+                                val.push(elem.value);
+                            }
+                        }
+                        msgArray.push(val);
+                    } else {
                         val = await arg.jsonValue();
-                    } catch {
-                        val = "__unset__";
-                    }
-
-                    if (val !== "__unset__") {
                         if (i === 0 && val === "|HEAD|") {
                             isHeader = true;
                         } else {
@@ -152,11 +173,21 @@ class NoBroCoteHTMLServer {
                         "   ",
                         symbol,
                         this.group,
-                        "->",
-                        logList.slice(1).join(" ")
+                        ">",
+                        ...logList.slice(1)
                     );
                 } else {
-                    console.log(this.group + " log: " + logList.join(" "));
+                    const iLen = 4;
+                    const indent = " ".repeat(iLen);
+                    const info = indent + "(" + this.group + ") log:";
+                    const separator = gray(`\n${indent}${"-".repeat(info.length - iLen - 1)}\n`);
+                    const msg = [
+                        bold(blue(info)),
+                        separator,
+                        ...logList,
+                        "\n"
+                    ];
+                    console.log(...msg);
                 }
             }
         });
@@ -173,19 +204,21 @@ class NoBroCoteHTMLServer {
             await page.addScriptTag(scriptObj);
         }
         
-        if (this.debug) console.log("  + appending test group");
+        if (this.debug) this.debugLog(1, "+", ["appending test group"]);
         await page.addScriptTag({type: "module", content: script});
 
         // wait for test instance to be read
         await page.waitForFunction("typeof window.testInstance !== 'undefined'");
 
-        if (this.debug) console.log("  + running test functions");
+        if (this.debug) this.debugLog(1, "+", ["running test functions"]);
+
         const result = await page.evaluate(async () => await window.testInstance.run());
         
+        if (this.debug) this.debugLog(0, "-", ["shutting down test server"]);
         await browser.close();
         await this.terminateServer();
 
-        if (this.debug) console.log("- all done\n- shutting down test server");
+        if (this.debug) this.debugLog(0, "-", ["all done"]);
         
         return result;
     }

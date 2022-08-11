@@ -258,7 +258,7 @@ class NoBroCote {
             return;
         }
 
-        const { red } = await import("colorette");
+        const { bold, red } = await import("colorette");
         
         const content = await this.#compileServerVars();
 
@@ -277,21 +277,26 @@ class NoBroCote {
             delete result.errorMessages;
         }
 
+        const preLog = () => [
+            "    •",
+            this.group,
+            ">"
+        ];
+
         const log = (...args) => {
-            args.unshift(this.group);
-            console.log(...args);
+            console.log(...[...preLog(), ...args].map(arg => bold(arg)));
         };
 
         const logError = (...args) => {
-            args.unshift(red(this.group));
-            console.log(...args);
+            console.log(...[...preLog(), ...args].map(arg => bold(red(arg))));
         };
 
         if (this.debug) {
-            log(`-------\nresults ${JSON.stringify(result, null, 4)}`);
+            log(`results\n${JSON.stringify(result, null, 4)}`);
         }
 
         if (result.errors && !this.expectFailure) {
+            log(`results\n${JSON.stringify(result, null, 4)}`);
             logError(
                 red(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`)
             );

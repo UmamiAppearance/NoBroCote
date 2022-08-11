@@ -74,6 +74,7 @@ test.makeUnit(
     "!=|42",
     () => {
         document.body.textContent = "4.2";
+        console.log("blue", [1,2, "white", [true, false]], 12, new Uint16Array([12]));
         return Number(document.body.textContent);
     }
 );

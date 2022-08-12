@@ -10,6 +10,7 @@ import { createServer } from "http";
 import puppeteer from "puppeteer";
 import { readFile } from "fs";
 import { bold, blue, gray, green, red } from "colorette";
+import unpackValues from "./utils.js";
 
 /**
  * HTML Test runner. It contains a http test
@@ -140,7 +141,7 @@ class NoBroCoteHTMLServer {
 
                     let val;
                     const { preview, type, subtype } = arg._remoteObject;
-                    //console.error(preview);
+                    
                     if (preview) {
                         val = await unpackValues(preview, subtype);
                         msgArray.push(val);
@@ -151,12 +152,16 @@ class NoBroCoteHTMLServer {
                         if (type === "function") {
                             val = arg._remoteObject;
                         }
+
+                        else if (type === "symbol") {
+                            val = arg._remoteObject.description;
+                        }
                         
                         else {
                             try {
                                 val = await arg.jsonValue();
                             } catch {
-                                val = "n/a -> value could not be unpacked for logging";
+                                val = "n/a (value could not be unpacked for logging)";
                             }
                         }
 
@@ -184,7 +189,7 @@ class NoBroCoteHTMLServer {
                         ...logList.slice(1)
                     );
                 } else {
-                    const iLen = 4;
+                    const iLen = 5;
                     const indent = " ".repeat(iLen);
                     const info = indent + "(" + this.group + ") log:";
                     const separator = gray(`\n${indent}${"-".repeat(info.length - iLen - 1)}\n`);
@@ -230,88 +235,5 @@ class NoBroCoteHTMLServer {
         return result;
     }
 }
-
-
-
-const getType = elem => {
-    
-    let val;
-    
-    if (elem.type === "number") {
-        val = Number(elem.value);
-    }
-    
-    else if (elem.type === "boolean") {
-        val = elem.value === "true";
-    }
-    
-    else if (elem.type === "undefined") {
-        val = undefined;
-    }
-    
-    else {
-        console.log("ELEM", elem);
-        if (elem.type === "accessor") {
-            val = "<accessor>";
-        } else if (elem.type === "function") {
-            val = "<function>";
-        } else if (elem.type === "bigint") {
-            val = BigInt(elem.value.slice(0, -1));
-        } else if (elem.value === "null") {
-            val = null;
-        } else {
-            val = elem.value;
-        }
-    }
-
-    return val;
-};
-
-const unpackValues = async (preview, subtype) => {
-    console.error(subtype);
-    let val; 
-    
-    if (subtype === "array") {
-        val = [];
-        for (const elem of preview.properties) {
-            console.error("ELEM", elem);
-            val.push(getType(elem));
-        }
-    }
-    
-    else if (subtype === "typedarray") {
-        let type;
-        const preArray = [];
-        
-        console.error(preview);
-        for (const elem of preview.properties) {
-            
-            // test if name is an index key
-            if (!isNaN(elem.name)) {
-                if (elem.type === "bigint") {
-                    preArray.push(elem.value.slice(0, -1));
-                } else {
-                    preArray.push(elem.value);
-                }
-            }
-
-            else if (elem.name === "Symbol(Symbol.toStringTag)") {
-                type = elem.value;
-            }
-
-        }
-        console.error(preArray);
-        val = global[type].from(preArray);
-    }
-
-    else if (typeof subtype === "undefined") {
-        val = {};
-        for (const elem of preview.properties) {
-            val[elem.name] = getType(elem);
-        }
-    }
-
-    return val;
-};
 
 export { NoBroCoteHTMLServer };

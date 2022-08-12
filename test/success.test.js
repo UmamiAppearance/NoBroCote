@@ -8,10 +8,6 @@ test.addScript({path: "./node_modules/wade/dist/wade.min.js"});
 // test injection relative module
 test.addImport("import { appendix } from './test/fixtures/testlibs/appendix.js';");
 
-class tt {
-    //
-}
-
 test.makeUnit(
     "default example",
     "true",
@@ -77,24 +73,8 @@ test.makeUnit(
     "not - with type conversion",
     "!=|42",
     () => {
-        const x=()=>1;
         document.body.textContent = "4.2";
-        console.log("blue", [1,2, true, null, undefined, "white", [true, false], new Uint16Array([1,2])], 12, new Uint16Array([12, 233]));
-        console.log({
-            a:1,
-            b:2,
-            log: ["a", "b", "c"],
-            get latest() {
-                return this.log[this.log.length - 1];
-            },
-            set yes(v) {
-                this.log.push(v);
-            },
-            bb: () => 1
-        });
-        console.log(x);
-        console.log(tt);
-        console.log(new BigInt64Array([24n]));
+        console.log(document.body.textContent);
         return Number(document.body.textContent);
     }
 );

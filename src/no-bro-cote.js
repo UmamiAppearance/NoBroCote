@@ -223,7 +223,7 @@ class NoBroCote {
 
             if (result !== "__unset__") {
                 const passed = this.#assert(result, expect, name, inputStr);
-                console.log("|HEAD|", passed, name);
+                console.log("|RESULT|", passed, name);
             }
         };
     }

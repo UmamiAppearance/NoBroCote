@@ -10,7 +10,6 @@ import { createServer } from "http";
 import puppeteer from "puppeteer";
 import { readFile } from "fs";
 import { bold, blue, gray, green, red } from "colorette";
-import { type } from "os";
 
 /**
  * HTML Test runner. It contains a http test
@@ -132,7 +131,7 @@ class NoBroCoteHTMLServer {
     
         page.on("console", async msg => {
 
-            let isHeader = false;
+            let isInternal = false;
 
             const argJoinFN = async () => {
                 let msgArray = [];
@@ -140,21 +139,29 @@ class NoBroCoteHTMLServer {
                 msg.args().forEach(async (arg, i) => {
 
                     let val;
-                    const { preview, subtype } = arg._remoteObject;
-                    console.error(preview);
+                    const { preview, type, subtype } = arg._remoteObject;
+                    //console.error(preview);
                     if (preview) {
-                        if (subtype === "array") {
-                            val = [];
-                            for (const elem of preview.properties) {
-                                console.error(elem);
-                                val.push(elem.value);
+                        val = await unpackValues(preview, subtype);
+                        msgArray.push(val);
+                    }
+                    
+                    else {
+
+                        if (type === "function") {
+                            val = arg._remoteObject;
+                        }
+                        
+                        else {
+                            try {
+                                val = await arg.jsonValue();
+                            } catch {
+                                val = "n/a -> value could not be unpacked for logging";
                             }
                         }
-                        msgArray.push(val);
-                    } else {
-                        val = await arg.jsonValue();
-                        if (i === 0 && val === "|HEAD|") {
-                            isHeader = true;
+
+                        if (i === 0 && val === "|RESULT|") {
+                            isInternal = true;
                         } else {
                             msgArray.push(val);
                         }
@@ -167,7 +174,7 @@ class NoBroCoteHTMLServer {
             const logList = await argJoinFN();
 
             if (logList) {
-                if (isHeader) {
+                if (isInternal) {
                     const symbol = logList[0] ? green("✔") : red("✖");
                     console.log(
                         "   ",
@@ -223,5 +230,88 @@ class NoBroCoteHTMLServer {
         return result;
     }
 }
+
+
+
+const getType = elem => {
+    
+    let val;
+    
+    if (elem.type === "number") {
+        val = Number(elem.value);
+    }
+    
+    else if (elem.type === "boolean") {
+        val = elem.value === "true";
+    }
+    
+    else if (elem.type === "undefined") {
+        val = undefined;
+    }
+    
+    else {
+        console.log("ELEM", elem);
+        if (elem.type === "accessor") {
+            val = "<accessor>";
+        } else if (elem.type === "function") {
+            val = "<function>";
+        } else if (elem.type === "bigint") {
+            val = BigInt(elem.value.slice(0, -1));
+        } else if (elem.value === "null") {
+            val = null;
+        } else {
+            val = elem.value;
+        }
+    }
+
+    return val;
+};
+
+const unpackValues = async (preview, subtype) => {
+    console.error(subtype);
+    let val; 
+    
+    if (subtype === "array") {
+        val = [];
+        for (const elem of preview.properties) {
+            console.error("ELEM", elem);
+            val.push(getType(elem));
+        }
+    }
+    
+    else if (subtype === "typedarray") {
+        let type;
+        const preArray = [];
+        
+        console.error(preview);
+        for (const elem of preview.properties) {
+            
+            // test if name is an index key
+            if (!isNaN(elem.name)) {
+                if (elem.type === "bigint") {
+                    preArray.push(elem.value.slice(0, -1));
+                } else {
+                    preArray.push(elem.value);
+                }
+            }
+
+            else if (elem.name === "Symbol(Symbol.toStringTag)") {
+                type = elem.value;
+            }
+
+        }
+        console.error(preArray);
+        val = global[type].from(preArray);
+    }
+
+    else if (typeof subtype === "undefined") {
+        val = {};
+        for (const elem of preview.properties) {
+            val[elem.name] = getType(elem);
+        }
+    }
+
+    return val;
+};
 
 export { NoBroCoteHTMLServer };

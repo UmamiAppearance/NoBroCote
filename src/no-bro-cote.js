@@ -145,8 +145,9 @@ class NoBroCote {
         let passed = true;
         
         const error = () => {
-            this.#makeError(input, result, expect, unit);
+            const errorMessage = "assertion failed";
             passed = false;
+            this.#makeError(input, result, errorMessage, expect, unit);
         };
 
         if ((/^!\|/).test(String(expect))) { 
@@ -230,7 +231,8 @@ class NoBroCote {
                 else {
                     this.#makeError(
                         inputStr,
-                        `${err.name} happened, while running '${name}' -> '${err.message}'`,
+                        `${err.name} happened, while running '${name}'`,
+                        err.message,
                         expect,
                         name
                     );
@@ -251,14 +253,15 @@ class NoBroCote {
      * Helper function. Creates an error which is added
      * to the results object. 
      */
-    #makeError(input, output, expected, unit) {
+    #makeError(input, output, errorMessage, expected, unit) {
         
         this.results.errors ++;
         const errObj = {
-            input: input,
-            output: output,
-            expected: expected,
-            unit: unit
+            input,
+            output,
+            errorMessage,
+            expected,
+            unit
         };
         
         this.results.errorMessages[unit] = errObj;
@@ -285,7 +288,8 @@ class NoBroCote {
             this.port,
             this.htmlPage,
             this.group,
-            this.debug
+            this.debug,
+            this.expectFailure
         );
 
         const result = await this.server.run(content, this.additionalScripts);

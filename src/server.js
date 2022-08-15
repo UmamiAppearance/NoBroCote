@@ -24,10 +24,11 @@ class NoBroCoteHTMLServer {
      * NoBroCote main class must be passed to it.
      * @param {number} port - Port 
      */
-    constructor(port, htmlFile, group, debug) {
+    constructor(port, htmlFile, group, debug, ignoreErrors) {
         this.port = port;
         this.group = group;
         this.debug = debug;
+        this.ignoreErrors = ignoreErrors;
         this.tests = null;
 
         // http server
@@ -205,7 +206,19 @@ class NoBroCoteHTMLServer {
         });
 
         page.on("pageerror", ({ message }) => {
-            console.error(red(`    > PAGE_ERROR:\n---\n${message}\n`));
+            if (!this.ignoreErrors) {
+                const iLen = 5;
+                const indent = " ".repeat(iLen);
+                const info = indent + "(" + this.group + ") page error:";
+                const separator = red(`\n${indent}${"-".repeat(info.length - iLen - 1)}\n`);
+                const msg = [
+                    bold(red(info)),
+                    separator,
+                    red(message),
+                    "\n"
+                ];
+                console.error(...msg);
+            }
         });
 
         // open html test page (htmlFile @constructor)

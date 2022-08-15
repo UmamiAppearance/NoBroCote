@@ -56,7 +56,8 @@ class NoBroCote {
             this.group = this.fileName
                 .split("/").at(-1)
                 .replace(/\.[^/.]+$/, "")
-                .replace(/\.?test-?/, "");
+                .replace(/test-/, "")
+                .replace(/\.test/, "");
         }
         
         // prepare imports and unit array and object

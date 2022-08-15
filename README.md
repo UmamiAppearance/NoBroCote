@@ -169,7 +169,7 @@ test.addImport('import myModule from "./path/to/module"');
  ```
 
 ### Server Port
-By default the server runs on port ``9999``. This can be changed, if this does not fit the needs. Simply declare another port, **eg:**
+By default the server runs on port ``10000``. If the port is already in use the port number is raised by one if an open port was found. The initial port can be changed, if this is a bad starting point for any reason. Simply declare another port in that case, **eg:**
 ```js
 test.port = 8080;
 ```

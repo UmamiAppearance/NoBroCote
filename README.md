@@ -64,7 +64,7 @@ test.makeUnit(
 ```
 
 #### Controlling the Test Assertion
-The regular assertion compares the expected value and the result for equality without type conversion (===). If this is not the desired behavior, there are some operators available to control the assertion process. Oparators are activated by passing them to the expect parameter of a ``makeUnit`` method.  
+The regular assertion compares the expected value and the result for equality without type conversion (===). If this is not the desired behavior, there are some operators available to control the assertion process. Operators are activated by passing them to the expect parameter of a ``makeUnit`` method.  
   
 _Available operators are:_
  -  ``!|`` not

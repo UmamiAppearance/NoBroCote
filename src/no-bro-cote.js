@@ -199,32 +199,50 @@ class NoBroCote {
         }
 
         this.units[name] = async () => {
-            let result = "__unset__";
+            
+            let err;
+            let passed;
+            let result;
+
             const inputStr = `Function: '${fn.name ? fn.name : "anonymous"}', Arguments: ${fnArgs.length ? fnArgs.join(", ") : "none"}`;
             
             try {
                 result = await fn(...fnArgs);
-            } catch(err) {
-                const exception = `${err.name} happened, while running ${name}: '${err.message}'`;
-                
-                let throwErr = true;
-                
-                if ((/^e\|/).test(String(expect))) {
-                    const errType = expect.replace(/^(e\|)/, "");
-                    if (this.errorList.includes(errType) && (errType === "" || err.name === errType)) {
-                        throwErr = false;
-                    }
-                }
+            } catch (e) {
+                err = e;
+            }
 
-                if (throwErr) {
-                    this.#makeError(inputStr, exception, expect, name);
+            if (err) {
+
+                // test if an error is expected
+                let expectErr = (/^e\|/).test(String(expect));
+                const errType = expect.replace(/^(e\|)/, "");
+
+                // test if the error is generic or in the error list
+                if (expectErr &&
+                    this.errorList.includes(errType) && 
+                    (errType === "" || err.name === errType))
+                {
+                    passed = true;   
+                }
+                
+                // if no error was expected create an error case
+                else {
+                    this.#makeError(
+                        inputStr,
+                        `${err.name} happened, while running '${name}' -> '${err.message}'`,
+                        expect,
+                        name
+                    );
+                    passed = false;
                 }
             }
 
-            if (result !== "__unset__") {
-                const passed = this.#assert(result, expect, name, inputStr);
-                console.log("|RESULT|", passed, name);
+            else {
+                passed = this.#assert(result, expect, name, inputStr);
             }
+
+            console.log("|RESULT|", passed, name);
         };
     }
 

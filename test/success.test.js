@@ -74,7 +74,6 @@ test.makeUnit(
     "!=|42",
     () => {
         document.body.textContent = "4.2";
-        console.log(document.body.textContent);
         return Number(document.body.textContent);
     }
 );

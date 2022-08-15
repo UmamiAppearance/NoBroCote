@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import{ fork } from "child_process";
+import { fork } from "child_process";
 import { readdirSync, statSync } from "fs";
 import { join as joinPath } from "path";
 

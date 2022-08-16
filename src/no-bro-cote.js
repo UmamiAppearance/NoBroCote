@@ -52,12 +52,6 @@ class NoBroCote {
         // store project root for initialization
         if (this.initialize) {
             this.rootDir = process.cwd();
-
-            this.group = this.fileName
-                .split("/").at(-1)
-                .replace(/\.[^/.]+$/, "")
-                .replace(/test-/, "")
-                .replace(/\.test/, "");
         }
         
         // prepare imports and unit array and object
@@ -282,13 +276,13 @@ class NoBroCote {
 
         const { bold, red } = await import("colorette");
         
-        const content = await this.#compileServerVars();
+        const { content, group } = await this.#compileServerVars();
 
         const server = await import("../src/server.js");
         this.server = new server.NoBroCoteHTMLServer(
             this.port,
             this.htmlPage,
-            this.group,
+            group,
             this.debug,
             this.expectFailure
         );
@@ -302,7 +296,7 @@ class NoBroCote {
 
         const preLog = () => [
             "    •",
-            this.group,
+            group,
             ">"
         ];
 
@@ -344,10 +338,16 @@ class NoBroCote {
         
         // import libraries
         const { access, readFileSync, F_OK } = await import("fs");
-        const { join } = await import("path");
+        const { join, sep } = await import("path");
         const { fileURLToPath } = await import("url");
         const { ImportManager } = await import("rollup-plugin-import-manager");
         const { default: urlExist }  = await import("url-exist");
+
+        const group = this.fileName
+            .split(sep).at(-1)
+            .replace(/\.[^/.]+$/, "")
+            .replace(/test-/, "")
+            .replace(/\.test/, "");
 
         // test if top level
         const topLevel = /^file/.test(this.fileName);
@@ -361,7 +361,7 @@ class NoBroCote {
         if (!topLevel) {
             classFilePath = classFilePath.replace("no-bro-cote.js", "index.js");
         }
-        const classFileName = classFilePath.split("/").at(-1);
+        const classFileName = classFilePath.split(sep).at(-1);
 
         // get path relative to root
         const relClassPath = classFilePath.replace(this.rootDir, "");
@@ -376,7 +376,7 @@ class NoBroCote {
 
         // count the tree of sub folders to root
         // (minus leading slash, minus filename)
-        const stepsToRoot = relInstancePath.split("/").length - 2;
+        const stepsToRoot = relInstancePath.split(sep).length - 2;
         let dirDots = (stepsToRoot) ? "../".repeat(stepsToRoot).slice(0,-1) : ".";
 
         // get content
@@ -439,7 +439,7 @@ class NoBroCote {
             this.htmlPage = "." + relClassPath.replace(classFileName, "barebone.html");
         }
 
-        return content;
+        return { content, group };
     }
 
 

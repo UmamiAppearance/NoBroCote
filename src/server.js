@@ -182,7 +182,12 @@ class NoBroCoteHTMLServer {
 
             if (logList) {
                 if (isInternal) {
+                    const exitCase = this.failFast && !this.ignoreErrors && logList[0] === false;
                     const symbol = logList[0] ? green("✔") : red("✖");
+                    if (exitCase) {
+                        logList.push(red("†††"));
+                    }
+
                     console.log(
                         "   ",
                         symbol,
@@ -190,8 +195,8 @@ class NoBroCoteHTMLServer {
                         ">",
                         ...logList.slice(1)
                     );
-                    if (this.failFast && !this.ignoreErrors && logList[0] === false) {
-                        await this.terminateServer();
+                    
+                    if (exitCase) {
                         process.exit(2);
                     }
                 } else {

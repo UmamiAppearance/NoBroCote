@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { red, underline } from "colorette";
 import { fork } from "child_process";
 import { readdirSync, readFileSync, statSync } from "fs";
 import { join as joinPath } from "path";
@@ -171,7 +172,7 @@ const forkPromise = (modulePath, args) => {
         signal.onabort = (n) => {
             let err;
             if (n === 2) {
-                err = new FailedError("An error occurred! Due to the fail fast flag all tests were stopped.");
+                err = new FailedError(underline(red("\nAn error occurred! Due to the fail fast flag all tests were stopped.\n")));
             } else {
                 err = new Error();
                 controller.abort();
@@ -210,8 +211,10 @@ const defaultRun = async () => {
         if (err.name === "FailedError") {
             tests.forEach(p => p.abort());
             console.error(err.message);
+            return 2;
         }
-        return 2;
+        return 4;
+        
     }
     return exitCodes.some(code => code !== 0)|0;
 };
@@ -224,11 +227,20 @@ const serialRun = async () => {
             console.log(`\nRunning Test File: '${testFile}' >>>`);
         }
         
-        const exitNode = await forkPromise(testFile, args);
-        if (argv.failFast && exitNode !== 0) {
-            break;
+        const test = forkPromise(testFile, args);
+        let exitCode;
+        try {
+            exitCode = await test;
+        } catch (err) {
+            if (err.name === "FailedError") {
+                test.abort();
+                console.error(err.message);
+                return 2;
+            }
+            return 4;
         }
-        exitCodes.push(exitNode);
+
+        exitCodes.push(exitCode);
         
         if (argv.debug) {
             console.log(`<<< Completed Test File: '${testFile}'\n`);

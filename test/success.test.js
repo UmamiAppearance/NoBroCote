@@ -10,7 +10,7 @@ test.addImport("import { appendix } from './test/fixtures/testlibs/appendix.js';
 
 test.makeUnit(
     "default example",
-    "true",
+    "tru",
     () => {
         document.body.textContent = "true";
         return document.body.textContent;

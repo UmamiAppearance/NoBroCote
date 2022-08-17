@@ -101,5 +101,13 @@ const unpackValues = async (preview, subtype) => {
     return val;
 };
 
+class FailedError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "FailedError";
+    }
+}
+
 
 export default unpackValues;
+export { FailedError };

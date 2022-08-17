@@ -24,11 +24,12 @@ class NoBroCoteHTMLServer {
      * NoBroCote main class must be passed to it.
      * @param {number} port - Port 
      */
-    constructor(port, htmlFile, group, debug, ignoreErrors) {
+    constructor(port, htmlFile, group, debug, ignoreErrors, failFast) {
         this.port = port;
         this.group = group;
         this.debug = debug;
-        this.ignoreErrors = ignoreErrors;
+        this.ignoreErrors = Boolean(ignoreErrors);
+        this.failFast = failFast;
         this.tests = null;
 
         // http server
@@ -189,6 +190,10 @@ class NoBroCoteHTMLServer {
                         ">",
                         ...logList.slice(1)
                     );
+                    if (this.failFast && !this.ignoreErrors && logList[0] === false) {
+                        await this.terminateServer();
+                        process.exit(2);
+                    }
                 } else {
                     const iLen = 5;
                     const indent = " ".repeat(iLen);
@@ -232,7 +237,7 @@ class NoBroCoteHTMLServer {
         if (this.debug) this.debugLog(1, "+", ["appending test group"]);
         await page.addScriptTag({type: "module", content: script});
 
-        // wait for test instance to be read
+        // wait for test instance to be ready
         await page.waitForFunction("typeof window.testInstance !== 'undefined'");
 
         if (this.debug) this.debugLog(1, "+", ["running test functions"]);

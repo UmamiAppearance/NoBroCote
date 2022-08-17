@@ -10,7 +10,8 @@ if (isBrowser) {
 } else {
     const optArgs = process.argv.slice(2);
     const debug = optArgs.includes("debug");
-    test = new NoBroCote(fileName, debug);
+    const failFast = optArgs.includes("failFast");
+    test = new NoBroCote(fileName, debug, failFast);
 }
 
 export { test, NoBroCote as default };

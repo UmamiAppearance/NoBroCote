@@ -19,13 +19,13 @@ class NoBroCote {
      * Kindly pass 'import.meta.url'
      * @param {string} fileName - import.meta.url
      */
-    constructor(fileName, debug=false) {
+    constructor(fileName, debug=false, failFast=false) {
 
         // name of the instance file
         this.fileName = fileName;
 
-        // debugging
         this.debug = debug;
+        this.failFast = failFast;
 
         // results obj for the test runner
         this.results = {
@@ -238,7 +238,7 @@ class NoBroCote {
             else {
                 passed = this.#assert(result, expect, name, inputStr);
             }
-
+             
             console.log("|RESULT|", passed, name);
         };
     }
@@ -284,10 +284,20 @@ class NoBroCote {
             this.htmlPage,
             group,
             this.debug,
-            this.expectFailure
+            this.expectFailure,
+            this.failFast
         );
 
-        const result = await this.server.run(content, this.additionalScripts);
+        let result;
+        if (this.failFast) {
+            try {
+                result = await this.server.run(content, this.additionalScripts);
+            } catch {
+                process.exit(2);
+            }
+        } else {
+            result = await this.server.run(content, this.additionalScripts);
+        }
 
         let exitCode = 0;
         if (!result.errors) {

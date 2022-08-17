@@ -4,8 +4,10 @@ import { fork } from "child_process";
 import { readdirSync, readFileSync, statSync } from "fs";
 import { join as joinPath } from "path";
 import picomatch from "picomatch";
+import AbortablePromise from "promise-abortable";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { FailedError } from "./utils.js";
 
 
 const cwd = process.cwd();
@@ -97,6 +99,9 @@ if (argv.m) {
         ? [ argv.m ]
         : argv.m;
 }
+if (argv.failFast) {
+    args.push("failFast");
+}
 
 
 
@@ -158,28 +163,60 @@ const collectFiles = (dirPath) => {
 };
 
 const forkPromise = (modulePath, args) => {
-    return new Promise((resolve, reject) => {
-        fork(modulePath, args)
-            .on("close", exitCode => resolve(exitCode))
+
+    const controller = new AbortController();
+    
+    const promise = new AbortablePromise((resolve, reject, signal) => {
+        
+        signal.onabort = (n) => {
+            let err;
+            if (n === 2) {
+                err = new FailedError("An error occurred! Due to the fail fast flag all tests were stopped.");
+            } else {
+                err = new Error();
+                controller.abort();
+            }
+            reject(err);
+        };
+        
+        fork(modulePath, args, { signal: controller.signal })
+            .on("close", exitCode => {
+                if (exitCode === 2) {
+                    promise.abort(2);
+                } else {
+                    resolve(exitCode);
+                }
+            })
             .on("error", error => reject(error));
     });
+
+    return promise;
 };
 
 collectFiles(cwd);
 
 if (!fileList.length) {
     console.error("Could not collect any test file(s)");
-    process.exit(1);
+    process.exit(3);
 }
 
-const defaultRun = async (...args) => {
-    const exitCodes = await Promise.all(
-        fileList.map(testFile => forkPromise(testFile, args))
-    );
+const defaultRun = async () => {
+    const tests = fileList.map(testFile => forkPromise(testFile, args));
+
+    let exitCodes = [];
+    try {
+        exitCodes = await Promise.all(tests);
+    } catch (err) {
+        if (err.name === "FailedError") {
+            tests.forEach(p => p.abort());
+            console.error(err.message);
+        }
+        return 2;
+    }
     return exitCodes.some(code => code !== 0)|0;
 };
 
-const serialRun = async (...args) => {
+const serialRun = async () => {
     const exitCodes = [];
     for (const testFile of fileList) {
         
@@ -187,7 +224,11 @@ const serialRun = async (...args) => {
             console.log(`\nRunning Test File: '${testFile}' >>>`);
         }
         
-        exitCodes.push(await forkPromise(testFile, args));
+        const exitNode = await forkPromise(testFile, args);
+        if (argv.failFast && exitNode !== 0) {
+            break;
+        }
+        exitCodes.push(exitNode);
         
         if (argv.debug) {
             console.log(`<<< Completed Test File: '${testFile}'\n`);
@@ -197,7 +238,7 @@ const serialRun = async (...args) => {
 };
 
 
-const exitCode = argv.serial ? await serialRun(args) : await defaultRun(args);
+const exitCode = argv.serial ? await serialRun() : await defaultRun();
 process.exit(exitCode);
 
 /*

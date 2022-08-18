@@ -20,9 +20,6 @@
     "test": "./src/cli.js",
     "lint": "eslint ./src/"
   },
-  "no-bro-cote": {
-    "match": "**/*.test.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/UmamiAppearance/NoBroCote.git"

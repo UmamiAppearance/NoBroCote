@@ -11,7 +11,7 @@ import { hideBin } from "yargs/helpers";
 import { FailedError } from "./utils.js";
 
 
-const cwd = process.cwd();
+const CWD = process.cwd();
 const reMatch = (arr) => new RegExp(arr.join("|"));
 
 
@@ -23,7 +23,7 @@ const { nbConfig, version } = await (async () => {
         )
     );
     return {
-        nbConfig: config["no-bro-cote"],
+        nbConfig: config["no-bro-cote"] || {},
         version: config.version
     };
 })();
@@ -80,26 +80,35 @@ const {argv} = yargs(hideBin(process.argv))
     .usage("$0 [<pattern>...]")
     .command("* [<pattern>...]", "Run tests", yargs => yargs.options(FLAGS).positional("pattern", {
         array: true,
+        // TODO: Adjust text
         describe: "Select which test files to run. Leave empty if you want no-bro-cote to run all test files as per your configuration. Accepts glob patterns, directories that (recursively) contain test files, and file paths optionally suffixed with a colon.",
         type: "string",
     }));
 
+const runnerArgs = [];
+console.log(argv);
 
-const args = [];
 if (argv.debug) {
-    args.push("debug");
+    runnerArgs.push("debug");
     argv.serial = true;
 }
+
+if (argv.pattern) {
+    nbConfig.files = argv.pattern;
+}
+
 if (argv.m) {
     userDefFiles = true;
     nbConfig.files = Array.isArray(argv.m)
         ? [ argv.m ]
         : argv.m;
 }
+
 if (argv.failFast) {
-    args.push("failFast");
+    runnerArgs.push("failFast");
 }
 
+console.log(nbConfig.files);
 // default match params
 let matchFiles = userDefFiles
     ? picomatch(nbConfig.files)
@@ -159,7 +168,7 @@ const collectFiles = async () => {
         }
     };
 
-    await collect(cwd);
+    await collect(CWD);
 
     if (!fileList.length) {
         console.error(red(underline("\nFailed: Could not collect any test file(s)\n")));
@@ -182,7 +191,7 @@ const forkPromise = (modulePath, args) => {
             if (n === 2) {
                 err = new FailedError(underline(red("\nAn error occurred! Due to the fail fast flag all tests were stopped.\n")));
             } else {
-                err = new Error();
+                err = new Error("Aborted");
                 controller.abort();
             }
             reject(err);
@@ -203,10 +212,8 @@ const forkPromise = (modulePath, args) => {
 };
 
 
-// test execution
-const fileList = await collectFiles(cwd);
-
-const defaultRun = async () => {
+// runners
+const defaultRun = async (fileList, args) => {
     const tests = fileList.map(testFile => forkPromise(testFile, args));
 
     let exitCodes = [];
@@ -224,7 +231,7 @@ const defaultRun = async () => {
     return exitCodes.some(code => code !== 0)|0;
 };
 
-const serialRun = async () => {
+const serialRun = async (fileList, args) => {
     const exitCodes = [];
     for (const testFile of fileList) {
         
@@ -251,11 +258,18 @@ const serialRun = async () => {
             console.log(blue(`___\nCompleted Test File: '${testFile}'\n`));
         }
     }
+
     return exitCodes.some(code => code !== 0)|0;
 };
 
 
-const exitCode = argv.serial ? await serialRun() : await defaultRun();
+// test execution
+const fileList = await collectFiles(CWD);
+
+const exitCode = argv.serial
+    ? await serialRun(fileList)
+    : await defaultRun(fileList);
+
 process.exit(exitCode);
 
 /*

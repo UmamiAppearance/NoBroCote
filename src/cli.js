@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { red, underline } from "colorette";
+import { blue, red, underline } from "colorette";
 import { fork } from "child_process";
-import { readdirSync, readFileSync, statSync } from "fs";
+import { readdir, readFile, stat } from "fs/promises";
 import { join as joinPath } from "path";
 import picomatch from "picomatch";
 import AbortablePromise from "promise-abortable";
@@ -12,14 +12,13 @@ import { FailedError } from "./utils.js";
 
 
 const cwd = process.cwd();
-const fileList = [];
 const reMatch = (arr) => new RegExp(arr.join("|"));
 
 
 // config values
-const { nbConfig, version } = (() => {
+const { nbConfig, version } = await (async () => {
     const config = JSON.parse(
-        readFileSync(
+        await readFile(
             new URL("../package.json", import.meta.url)
         )
     );
@@ -57,12 +56,10 @@ const FLAGS = {
 };
 
 
-
-
 // files
 const noWayDirs = reMatch([
     "^\\.git(:?hub)?$",
-    "node_modules",
+    "^node_modules$",
     "^_[^_]"
 ]);
 
@@ -88,7 +85,6 @@ const {argv} = yargs(hideBin(process.argv))
     }));
 
 
-console.log(argv);
 const args = [];
 if (argv.debug) {
     args.push("debug");
@@ -104,10 +100,7 @@ if (argv.failFast) {
     args.push("failFast");
 }
 
-
-
-
-
+// default match params
 let matchFiles = userDefFiles
     ? picomatch(nbConfig.files)
     : picomatch([
@@ -140,29 +133,44 @@ let excludeDirs = userDefFiles
     ]);
 
 
-// test execution
-const collectFiles = (dirPath) => {
-    const files = readdirSync(dirPath);
-  
-    files.forEach(file => {
-        
-        if (statSync(joinPath(dirPath, file)).isDirectory()) {
-            if (!noWayDirs.test(file)) {
-                collectFiles(joinPath(dirPath, file));
+// file collecting fn
+const collectFiles = async () => {
+    const fileList = [];
+    
+    const collect = async dirPath => {
+        const files = await readdir(dirPath);
+    
+        for (const file of files) {
+            
+            if ((await stat(joinPath(dirPath, file))).isDirectory()) {
+                if (!noWayDirs.test(file)) {
+                    await collect(joinPath(dirPath, file));
+                }
             }
-        }
-        
-        else {
-            if (!noWayFiles.test(file)) {
-                const fullPath = joinPath(dirPath, file);
-                if (!excludeDirs(fullPath) && matchFiles(fullPath)) {
-                    fileList.push(fullPath);
+            
+            else {
+                if (!noWayFiles.test(file)) {
+                    const fullPath = joinPath(dirPath, file);
+                    if (!excludeDirs(fullPath) && matchFiles(fullPath)) {
+                        fileList.push(fullPath);
+                    }
                 }
             }
         }
-    });
+    };
+
+    await collect(cwd);
+
+    if (!fileList.length) {
+        console.error(red(underline("\nFailed: Could not collect any test file(s)\n")));
+        process.exit(3);
+    }
+    
+    return fileList;
 };
 
+
+// abortable fork as promise
 const forkPromise = (modulePath, args) => {
 
     const controller = new AbortController();
@@ -194,12 +202,9 @@ const forkPromise = (modulePath, args) => {
     return promise;
 };
 
-collectFiles(cwd);
 
-if (!fileList.length) {
-    console.error("Could not collect any test file(s)");
-    process.exit(3);
-}
+// test execution
+const fileList = await collectFiles(cwd);
 
 const defaultRun = async () => {
     const tests = fileList.map(testFile => forkPromise(testFile, args));
@@ -224,7 +229,7 @@ const serialRun = async () => {
     for (const testFile of fileList) {
         
         if (argv.debug) {
-            console.log(`\nRunning Test File: '${testFile}' >>>`);
+            console.log(blue(underline(`\nRunning Test File: '${testFile}'`)));
         }
         
         const test = forkPromise(testFile, args);
@@ -243,7 +248,7 @@ const serialRun = async () => {
         exitCodes.push(exitCode);
         
         if (argv.debug) {
-            console.log(`<<< Completed Test File: '${testFile}'\n`);
+            console.log(blue(`___\nCompleted Test File: '${testFile}'\n`));
         }
     }
     return exitCodes.some(code => code !== 0)|0;

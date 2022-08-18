@@ -135,6 +135,7 @@ class NoBroCoteHTMLServer {
         page.on("console", async msg => {
 
             let isInternal = false;
+            let isError = false;
 
             const argJoinFN = async () => {
                 let msgArray = [];
@@ -169,6 +170,8 @@ class NoBroCoteHTMLServer {
 
                         if (i === 0 && val === "|RESULT|") {
                             isInternal = true;
+                        } else if (i === 0 && val === "|ERROR|") {
+                            isError = true;
                         } else {
                             msgArray.push(val);
                         }
@@ -198,6 +201,10 @@ class NoBroCoteHTMLServer {
                     
                     if (exitCase) {
                         process.exit(2);
+                    }
+                } else if (isError) {
+                    if (this.failFast && !this.ignoreErrors) {
+                        console.log(bold(red("\nERROR")), red(logList.at(0)));
                     }
                 } else {
                     const iLen = 5;

@@ -267,8 +267,8 @@ const serialRun = async (fileList, args) => {
 const fileList = await collectFiles(CWD);
 
 const exitCode = argv.serial
-    ? await serialRun(fileList)
-    : await defaultRun(fileList);
+    ? await serialRun(fileList, runnerArgs)
+    : await defaultRun(fileList, runnerArgs);
 
 process.exit(exitCode);
 

@@ -95,6 +95,8 @@ class NoBroCoteHTMLServer {
             this.server.close();
         };
 
+        //this.onConsole = this.onConsole.bind(this);
+
     }
 
     debugLog(indent, sign, args) {
@@ -109,6 +111,113 @@ class NoBroCoteHTMLServer {
         }
             
         console.log(...msg.map(arg => gray(arg)));
+    }
+
+    async onConsole(msg) {
+
+        let isInternal = false;
+        let isError = false;
+
+        const argJoinFN = async () => {
+            let msgArray = [];
+            
+            msg.args().forEach(async (arg, i) => {
+
+                let val;
+                const { preview, type, subtype } = arg._remoteObject;
+                
+                if (preview) {
+                    val = await unpackValues(preview, subtype);
+                    msgArray.push(val);
+                }
+                
+                else {
+
+                    if (type === "function") {
+                        val = arg._remoteObject;
+                    }
+
+                    else if (type === "symbol") {
+                        val = arg._remoteObject.description;
+                    }
+                    
+                    else {
+                        try {
+                            val = await arg.jsonValue();
+                        } catch {
+                            val = "n/a (value could not be unpacked for logging)";
+                        }
+                    }
+
+                    if (i === 0 && val === "|RESULT|") {
+                        isInternal = true;
+                    } else if (i === 0 && val === "|ERROR|") {
+                        isError = true;
+                    } else {
+                        msgArray.push(val);
+                    }
+                }
+            });
+
+            return msgArray;
+        };
+        
+        const logList = await argJoinFN();
+
+        if (logList) {
+            if (isInternal) {
+                const exitCase = this.failFast && !this.ignoreErrors && logList[0] === false;
+                const symbol = logList[0] ? green("✔") : red("✖");
+                if (exitCase) {
+                    logList.push(red("†††"));
+                }
+
+                console.log(
+                    "   ",
+                    symbol,
+                    this.group,
+                    ">",
+                    ...logList.slice(1)
+                );
+                
+                if (exitCase) {
+                    process.exit(2);
+                }
+            } else if (isError) {
+                if (this.failFast && !this.ignoreErrors) {
+                    console.log(bold(red("\nERROR")), red(logList.at(0)));
+                }
+            } else {
+                const iLen = 5;
+                const indent = " ".repeat(iLen);
+                const info = indent + "(" + this.group + ") log:";
+                const separator = gray(`\n${indent}${"-".repeat(info.length - iLen - 1)}\n`);
+                const msg = [
+                    bold(blue(info)),
+                    separator,
+                    ...logList,
+                    "\n"
+                ];
+                console.log(...msg);
+            }
+        }
+    }
+
+    async onPageError(msgObj) {
+        const { message } = msgObj;
+        if (!this.ignoreErrors) {
+            const iLen = 5;
+            const indent = " ".repeat(iLen);
+            const info = indent + "(" + this.group + ") page error:";
+            const separator = red(`\n${indent}${"-".repeat(info.length - iLen - 1)}\n`);
+            const msg = [
+                bold(red(info)),
+                separator,
+                red(message),
+                "\n"
+            ];
+            console.error(...msg);
+        }
     }
 
 
@@ -132,111 +241,9 @@ class NoBroCoteHTMLServer {
         // set timeout to 3000 ms (which is plenty of time for a local server)
         page.setDefaultNavigationTimeout(3000);
     
-        page.on("console", async msg => {
+        page.on("console", this.onConsole.bind(this));
 
-            let isInternal = false;
-            let isError = false;
-
-            const argJoinFN = async () => {
-                let msgArray = [];
-                
-                msg.args().forEach(async (arg, i) => {
-
-                    let val;
-                    const { preview, type, subtype } = arg._remoteObject;
-                    
-                    if (preview) {
-                        val = await unpackValues(preview, subtype);
-                        msgArray.push(val);
-                    }
-                    
-                    else {
-
-                        if (type === "function") {
-                            val = arg._remoteObject;
-                        }
-
-                        else if (type === "symbol") {
-                            val = arg._remoteObject.description;
-                        }
-                        
-                        else {
-                            try {
-                                val = await arg.jsonValue();
-                            } catch {
-                                val = "n/a (value could not be unpacked for logging)";
-                            }
-                        }
-
-                        if (i === 0 && val === "|RESULT|") {
-                            isInternal = true;
-                        } else if (i === 0 && val === "|ERROR|") {
-                            isError = true;
-                        } else {
-                            msgArray.push(val);
-                        }
-                    }
-                });
-
-                return msgArray;
-            };
-            
-            const logList = await argJoinFN();
-
-            if (logList) {
-                if (isInternal) {
-                    const exitCase = this.failFast && !this.ignoreErrors && logList[0] === false;
-                    const symbol = logList[0] ? green("✔") : red("✖");
-                    if (exitCase) {
-                        logList.push(red("†††"));
-                    }
-
-                    console.log(
-                        "   ",
-                        symbol,
-                        this.group,
-                        ">",
-                        ...logList.slice(1)
-                    );
-                    
-                    if (exitCase) {
-                        process.exit(2);
-                    }
-                } else if (isError) {
-                    if (this.failFast && !this.ignoreErrors) {
-                        console.log(bold(red("\nERROR")), red(logList.at(0)));
-                    }
-                } else {
-                    const iLen = 5;
-                    const indent = " ".repeat(iLen);
-                    const info = indent + "(" + this.group + ") log:";
-                    const separator = gray(`\n${indent}${"-".repeat(info.length - iLen - 1)}\n`);
-                    const msg = [
-                        bold(blue(info)),
-                        separator,
-                        ...logList,
-                        "\n"
-                    ];
-                    console.log(...msg);
-                }
-            }
-        });
-
-        page.on("pageerror", ({ message }) => {
-            if (!this.ignoreErrors) {
-                const iLen = 5;
-                const indent = " ".repeat(iLen);
-                const info = indent + "(" + this.group + ") page error:";
-                const separator = red(`\n${indent}${"-".repeat(info.length - iLen - 1)}\n`);
-                const msg = [
-                    bold(red(info)),
-                    separator,
-                    red(message),
-                    "\n"
-                ];
-                console.error(...msg);
-            }
-        });
+        page.on("pageerror", this.onPageError.bind(this));
 
         // open html test page (htmlFile @constructor)
         await page.goto(`http://127.0.0.1:${this.port}/`);

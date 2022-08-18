@@ -260,7 +260,6 @@ class NoBroCote {
         };
 
         console.log("|ERROR|", JSON.stringify(errObj, null, 4));
-        //console.error(errObj);
         
         this.results.errorMessages[unit] = errObj;
     }

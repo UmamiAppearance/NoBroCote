@@ -22,13 +22,18 @@ class NoBroCoteHTMLServer {
     /**
      * Creates the puppeteer instance. The path of
      * NoBroCote main class must be passed to it.
-     * @param {number} port - Port 
+     * @param {number} port - Port number.
+     * @param {string} htmlFile - The address of the html page to be used for testing.
+     * @param {string} group - The name of the current test group (gets generated from the filename)
+     * @param {boolean} debug - If true extra verbose information are getting logged. 
+     * @param {boolean} expectErrors - If true errors or failing tests are expected and at least one test unit has to fail.
+     * @param {boolean} failFast - If true the first failure will stop the whole testing.
      */
-    constructor(port, htmlFile, group, debug, ignoreErrors, failFast) {
+    constructor(port, htmlFile, group, debug, expectErrors, failFast) {
         this.port = port;
         this.group = group;
         this.debug = debug;
-        this.ignoreErrors = Boolean(ignoreErrors);
+        this.expectErrors = Boolean(expectErrors);
         this.failFast = failFast;
         this.tests = null;
 
@@ -47,15 +52,14 @@ class NoBroCoteHTMLServer {
         };
 
         this.socket;
-
         this.server = createServer((request, response) => {
             
             let filePath;
             if (request.url === "/") {
                 filePath = htmlFile;
-                if (this.debug) this.debugLog(1, "+", ["opening html test page"]);
+                if (this.debug) this.debugLog(1, "+", "opening html test page");
             } else {
-                if (this.debug) this.debugLog(1, "+", ["importing", request.url.split("/").at(-1)]);
+                if (this.debug) this.debugLog(1, "+", "importing", request.url.split("/").at(-1));
                 filePath = `.${request.url}`;
             }
 
@@ -94,12 +98,16 @@ class NoBroCoteHTMLServer {
             if (this.socket) this.socket.destroy();
             this.server.close();
         };
-
-        //this.onConsole = this.onConsole.bind(this);
-
     }
 
-    debugLog(indent, sign, args) {
+
+    /**
+     * Produces styled logs for debugging information.
+     * @param {number} indent - Number of spaces added to the log. 
+     * @param {string} sign - A utf-8 symbol, which will be placed before the actual log. 
+     * @param {...*} args - Actual arguments to be logged.
+     */
+    debugLog(indent, sign, ...args) {
         const msg = [
             sign,
             "(" + this.group + ")",
@@ -113,11 +121,19 @@ class NoBroCoteHTMLServer {
         console.log(...msg.map(arg => gray(arg)));
     }
 
+
+    /**
+     * Gets called whenever a log is done at the html page.
+     * This methods logs these events to the terminal.
+     * @param {...*} msg 
+     */
     async onConsole(msg) {
 
         let isInternal = false;
         let isError = false;
 
+        // Loops through all arguments of the log
+        // analyzes the type.
         const argJoinFN = async () => {
             let msgArray = [];
             
@@ -126,6 +142,7 @@ class NoBroCoteHTMLServer {
                 let val;
                 const { preview, type, subtype } = arg._remoteObject;
                 
+                // if type is an array
                 if (preview) {
                     val = await unpackValues(preview, subtype);
                     msgArray.push(val);
@@ -149,6 +166,8 @@ class NoBroCoteHTMLServer {
                         }
                     }
 
+                    // look for special triggers (at the first index)
+                    // for internal logs and error logs
                     if (i === 0 && val === "|RESULT|") {
                         isInternal = true;
                     } else if (i === 0 && val === "|ERROR|") {
@@ -162,11 +181,14 @@ class NoBroCoteHTMLServer {
             return msgArray;
         };
         
+
+        // wait for all arguments to be unpacked and analyzed
         const logList = await argJoinFN();
 
+        // handle the actual logging (to the terminal) with style
         if (logList) {
             if (isInternal) {
-                const exitCase = this.failFast && !this.ignoreErrors && logList[0] === false;
+                const exitCase = this.failFast && !this.expectErrors && logList[0] === false;
                 const symbol = logList[0] ? green("✔") : red("✖");
                 if (exitCase) {
                     logList.push(red("†††"));
@@ -184,7 +206,7 @@ class NoBroCoteHTMLServer {
                     process.exit(2);
                 }
             } else if (isError) {
-                if (this.failFast && !this.ignoreErrors) {
+                if (this.failFast && !this.expectErrors) {
                     console.log(bold(red("\nERROR")), red(logList.at(0)));
                 }
             } else {
@@ -203,9 +225,19 @@ class NoBroCoteHTMLServer {
         }
     }
 
+
+    /**
+     * Helper method which gets called whenever a page error happens.
+     * These are not errors inside of the test units but error, that
+     * happen while processing the html page (and which are almost 
+     * certainly inside of the code of the html page).
+     * But to break it down this method is only there to prettify 
+     * the output.
+     * @param {Object} msgObj - The error object, introduced by the page. 
+     */
     async onPageError(msgObj) {
         const { message } = msgObj;
-        if (!this.ignoreErrors) {
+        if (!this.expectErrors) {
             const iLen = 5;
             const indent = " ".repeat(iLen);
             const info = indent + "(" + this.group + ") page error:";
@@ -222,17 +254,20 @@ class NoBroCoteHTMLServer {
 
 
     /**
-     * Test Runner. Called after everything is initialized.
+     * The Test Runner. Called after everything is initialized.
+     * It starts the server, launches the html page, appends the
+     * test units to the page, waits until everything is loaded
+     * and waits for the results ands returns them.
      * @param {string} script - Content of main script as string
      * @param {Object[]} additionalScripts - Array of puppeteer 
-     * @returns 
+     * @returns {Object} - Result object.
      */
     async run(script, additionalScripts) {
         
-        if (this.debug) this.debugLog(0, "-", ["spinning up local http test server"]);
+        if (this.debug) this.debugLog(0, "-", "spinning up local http test server");
         this.server.listen(this.port);
 
-        if (this.debug) this.debugLog(0, "-", ["running tests:"]);
+        if (this.debug) this.debugLog(0, "-", "running tests:");
         const browser = await puppeteer.launch();
         await browser.createIncognitoBrowserContext();
         
@@ -253,21 +288,21 @@ class NoBroCoteHTMLServer {
             await page.addScriptTag(scriptObj);
         }
         
-        if (this.debug) this.debugLog(1, "+", ["appending test group"]);
+        if (this.debug) this.debugLog(1, "+", "appending test group");
         await page.addScriptTag({type: "module", content: script});
 
         // wait for test instance to be ready
         await page.waitForFunction("typeof window.testInstance !== 'undefined'");
 
-        if (this.debug) this.debugLog(1, "+", ["running test functions"]);
+        if (this.debug) this.debugLog(1, "+", "running test functions");
 
         const result = await page.evaluate(async () => await window.testInstance.run());
         
-        if (this.debug) this.debugLog(0, "-", ["shutting down test server"]);
+        if (this.debug) this.debugLog(0, "-", "shutting down test server");
         await browser.close();
         await this.terminateServer();
 
-        if (this.debug) this.debugLog(0, "-", ["all done"]);
+        if (this.debug) this.debugLog(0, "-", "all done");
         
         return result;
     }

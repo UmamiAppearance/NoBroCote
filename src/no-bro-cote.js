@@ -15,9 +15,10 @@
 class NoBroCote {
 
     /**
-     * Create a new NoBroCode instance. 
-     * Kindly pass 'import.meta.url'
-     * @param {string} fileName - import.meta.url
+     * Creates a new NoBroCode instance.
+     * @param {string} fileName - File path of the test file. 
+     * @param {boolean} [debug=false] - If true, the debug mode is active. 
+     * @param {boolean} [failFast=false] - If true, the first fail will cause the whole testing to stop.
      */
     constructor(fileName, debug=false, failFast=false) {
 
@@ -71,7 +72,6 @@ class NoBroCote {
      * Additional scripts to be loaded into the page,
      * before testing. It requires an object which can 
      * have the following keys (as defined by Puppeteer):
-     * cf. https://devdocs.io/puppeteer/
      * 
      *  - url <string> URL of a script to be added.
      *  - path <string> Path to the JavaScript file to be injected into frame. If path is a relative path, then it is resolved relative to projects root directory (cwd).
@@ -80,7 +80,8 @@ class NoBroCote {
      * 
      * You can also pass an array of objects.
      * 
-     * @param {(Object|Object[])} script - Script object (or array of objects) as required by puppeteer  
+     * @param {(Object|Object[])} script - Script object (or array of objects) as required by puppeteer
+     * @see https://devdocs.io/puppeteer/#pageaddscripttagoptions
      */
     addScript(script) {
         if (!this.initialize) {
@@ -277,7 +278,6 @@ class NoBroCote {
         }
 
         const { bold, red } = await import("colorette");
-        
         const { content, group } = await this.#compileServerVars();
 
         const server = await import("../src/server.js");
@@ -312,8 +312,11 @@ class NoBroCote {
             ">"
         ];
 
-        const log = (...args) => {
-            console.log(...[...preLog(), ...args].map(arg => bold(arg)));
+        const logResult = (result) => {
+            console.log(
+                ...preLog(),
+                bold(`results\n${JSON.stringify(result, null, 4)}`)
+            );
         };
 
         const logError = (...args) => {
@@ -321,11 +324,11 @@ class NoBroCote {
         };
 
         if (this.debug) {
-            log(`results\n${JSON.stringify(result, null, 4)}`);
+            logResult(result);
         }
 
         if (result.errors && !this.expectFailure) {
-            log(`results\n${JSON.stringify(result, null, 4)}`);
+            logResult(result);
             logError(
                 red(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`)
             );

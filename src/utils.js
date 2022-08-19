@@ -15,7 +15,6 @@ const getType = elem => {
     }
     
     else {
-        console.log("ELEM", elem);
         if (elem.type === "accessor") {
             val = "<accessor>";
         } else if (elem.type === "function") {
@@ -33,13 +32,11 @@ const getType = elem => {
 };
 
 const unpackValues = async (preview, subtype) => {
-    console.error("SUBTYPE", subtype);
     let val; 
     
     if (subtype === "array") {
         val = [];
         for (const elem of preview.properties) {
-            console.error("ELEM", elem);
             val.push(getType(elem));
         }
     }
@@ -84,7 +81,6 @@ const unpackValues = async (preview, subtype) => {
     }
 
     else if (subtype === "set") {
-        console.error(preview);
         val = new Set();
         for (const entry of preview.entries) {
             val.add(entry.value.description);

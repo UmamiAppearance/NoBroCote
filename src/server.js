@@ -105,7 +105,7 @@ class NoBroCoteHTMLServer {
      * Produces styled logs for debugging information.
      * @param {number} indent - Number of spaces added to the log. 
      * @param {string} sign - A utf-8 symbol, which will be placed before the actual log. 
-     * @param {...*} args - Actual arguments to be logged.
+     * @param {...any} args - Actual arguments to be logged.
      */
     debugLog(indent, sign, ...args) {
         const msg = [
@@ -125,10 +125,9 @@ class NoBroCoteHTMLServer {
     /**
      * Gets called whenever a log is done at the html page.
      * This methods logs these events to the terminal.
-     * @param {...*} msg 
+     * @param {...any} msg 
      */
     async onConsole(msg) {
-
         let isInternal = false;
         let isError = false;
 
@@ -137,10 +136,13 @@ class NoBroCoteHTMLServer {
         const argJoinFN = async () => {
             let msgArray = [];
             
-            msg.args().forEach(async (arg, i) => {
+            let i = -1;
+            for (const arg of await msg.args()) {
+                i++;
 
                 let val;
-                const { preview, type, subtype } = arg._remoteObject;
+                let remoteObject = await arg.remoteObject();
+                const { preview, type, subtype } = remoteObject;
                 
                 // if type is an array
                 if (preview) {
@@ -151,19 +153,15 @@ class NoBroCoteHTMLServer {
                 else {
 
                     if (type === "function") {
-                        val = arg._remoteObject;
+                        val = remoteObject;
                     }
 
                     else if (type === "symbol") {
-                        val = arg._remoteObject.description;
+                        val = remoteObject.description;
                     }
                     
                     else {
-                        try {
-                            val = await arg.jsonValue();
-                        } catch {
-                            val = "n/a (value could not be unpacked for logging)";
-                        }
+                        val = remoteObject.value;
                     }
 
                     // look for special triggers (at the first index)
@@ -172,11 +170,12 @@ class NoBroCoteHTMLServer {
                         isInternal = true;
                     } else if (i === 0 && val === "|ERROR|") {
                         isError = true;
+                        if (!this.failFast) break;
                     } else {
                         msgArray.push(val);
                     }
                 }
-            });
+            }
 
             return msgArray;
         };

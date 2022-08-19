@@ -3,6 +3,7 @@
 import { blue, red, underline } from "colorette";
 import { fork } from "child_process";
 import { readdir, readFile, stat } from "fs/promises";
+import { isMatch } from "matcher";
 import { join as joinPath } from "path";
 import picomatch from "picomatch";
 import AbortablePromise from "promise-abortable";
@@ -28,6 +29,9 @@ const { nbConfig, version } = await (async () => {
     };
 })();
 
+if (!Array.isArray(nbConfig.extensions)) {
+    nbConfig.extensions = ["js", "mjs"];
+}
 
 // command line arguments
 const coerceLastValue = value => Array.isArray(value) ? value.pop() : value;
@@ -67,13 +71,9 @@ const noWayFiles = reMatch([
     "^_[^_]"
 ]);
 
-const ext = Array.isArray(nbConfig.extensions)
-    ? `@(${nbConfig.extensions.join("|")})`
-    : "@(js|mjs)";
+const ext = `@(${nbConfig.extensions.join("|")})`;
 
-
-if (nbConfig.match) nbConfig.files = [ String(nbConfig.match) ];
-let userDefFiles = Array.isArray(nbConfig.match);
+const ensureExtension = reMatch(nbConfig.extensions.map(ext => `\\.${ext}$`));
 
 const {argv} = yargs(hideBin(process.argv))
     .version(version)
@@ -86,6 +86,7 @@ const {argv} = yargs(hideBin(process.argv))
     }));
 
 const runnerArgs = [];
+let userDefFiles = false;
 console.log(argv);
 
 if (argv.debug) {
@@ -95,34 +96,38 @@ if (argv.debug) {
 
 if (argv.pattern) {
     nbConfig.files = argv.pattern;
+    userDefFiles = true;
 }
 
 if (argv.m) {
-    userDefFiles = true;
-    nbConfig.files = Array.isArray(argv.m)
-        ? [ argv.m ]
-        : argv.m;
+    nbConfig.match = argv.m;
 }
 
 if (argv.failFast) {
     runnerArgs.push("failFast");
 }
 
-console.log(nbConfig.files);
+
 // default match params
-let matchFiles = userDefFiles
-    ? picomatch(nbConfig.files)
-    : picomatch([
-        `test.${ext}`,
-        `src/test.${ext}`,
-        `source/test.${ext}`,
-        `**/test-*.${ext}`,
-        `**/*.spec.${ext}`,
-        `**/*.test.${ext}`,
-        `**/test/**/*.${ext}`,
-        `**/tests/**/*.${ext}`,
-        `**/__tests__/**/*.${ext}`
-    ]);
+let matchFiles;
+if (nbConfig.match) {
+    matchFiles = str => isMatch(str, nbConfig.match);
+    userDefFiles = true;
+} else {
+    matchFiles = userDefFiles
+        ? picomatch(nbConfig.files)
+        : picomatch([
+            `test.${ext}`,
+            `src/test.${ext}`,
+            `source/test.${ext}`,
+            `**/test-*.${ext}`,
+            `**/*.spec.${ext}`,
+            `**/*.test.${ext}`,
+            `**/test/**/*.${ext}`,
+            `**/tests/**/*.${ext}`,
+            `**/__tests__/**/*.${ext}`
+        ]);
+}
 
 let excludeDirs = userDefFiles
     ? () => false
@@ -158,7 +163,7 @@ const collectFiles = async () => {
             }
             
             else {
-                if (!noWayFiles.test(file)) {
+                if (!noWayFiles.test(file) && ensureExtension.test(file)) {
                     const fullPath = joinPath(dirPath, file);
                     if (!excludeDirs(fullPath) && matchFiles(fullPath)) {
                         fileList.push(fullPath);

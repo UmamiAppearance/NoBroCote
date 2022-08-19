@@ -144,7 +144,7 @@ class NoBroCoteHTMLServer {
                 let remoteObject = await arg.remoteObject();
                 const { preview, type, subtype } = remoteObject;
                 
-                // if type is an array
+                // if type is an object
                 if (preview) {
                     val = await unpackValues(preview, subtype);
                     msgArray.push(val);

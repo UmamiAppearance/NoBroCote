@@ -87,6 +87,7 @@ const unpackValues = async (preview, subtype) => {
         }
     }
 
+    // ordinary object
     else if (typeof subtype === "undefined") {
         val = {};
         for (const elem of preview.properties) {

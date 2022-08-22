@@ -3,7 +3,7 @@
 /**
  * CLI nor no-bro-code
  * A lot of ideas for this interface (and also small code parts
- * are inspired/adopted or a copied from the great AVA test runner).
+ * are inspired/adopted or copied from the great AVA test runner).
  * If this is true for a code part it is marked as such.
  * 
  * This CLI is collecting all test files as defined per config or

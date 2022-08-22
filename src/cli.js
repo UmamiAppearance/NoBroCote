@@ -13,6 +13,9 @@ import { FailedError } from "./utils.js";
 
 
 const CWD = process.cwd();
+const isDirectory = async filePath => (await stat(filePath)).isDirectory();
+const reMatch = (arr) => new RegExp(arr.join("|"));
+
 
 // config values
 const { config, version } = await (async () => {
@@ -65,7 +68,7 @@ const {argv} = yargs(hideBin(process.argv))
     .command("* [<pattern>...]", "Run tests", yargs => yargs.options(FLAGS).positional("pattern", {
         array: true,
         // TODO: Adjust text
-        describe: "Select which test files to run. Leave empty if you want no-bro-cote to run all test files as per your configuration. Accepts glob patterns, directories that (recursively) contain test files, and file paths optionally suffixed with a colon.",
+        describe: "Select which test files to run. Leave empty if you want no-bro-cote to run all test files as per your configuration. Accepts glob and minimatch patterns, directories that (recursively) contain test files, and relative or absolute file paths.",
         type: "string",
     }));
 
@@ -80,8 +83,37 @@ if (argv.debug) {
 }
 
 if (argv.pattern) {
-    config.files = argv.pattern;
-    userDefFiles = true;
+    config.files = [];
+    for (let pattern of argv.pattern) {
+        
+        if (pattern.at(0) === "." || pattern.at(0) === "/") {
+            
+            // convert relative paths to absolute
+            if (pattern.at(0) === ".") {
+                pattern = joinPath(CWD, pattern);
+            }
+            
+            // if the path contains no * and it is a directory
+            // two ** will get appended to convert it into a 
+            // valid minimatch patter
+            if (!pattern.includes("*")) {
+                let isDir = false;
+                try {
+                    isDir = await isDirectory(pattern);
+                } catch {
+                    continue;
+                }
+                if (isDir) {
+                    pattern = joinPath(pattern, "**"); 
+                }
+            }
+        }
+        config.files.push(pattern);
+    }
+
+    if (config.files.length) {
+        userDefFiles = true;
+    }
 }
 
 if (argv.m) {
@@ -95,8 +127,6 @@ if (argv.failFast) {
 
 
 // files
-const reMatch = (arr) => new RegExp(arr.join("|"));
-
 const noWayDirs = reMatch([
     "^\\.git(:?hub)?$",
     "^node_modules$",
@@ -163,7 +193,7 @@ const collectFiles = async () => {
     
         for (const file of files) {
             
-            if ((await stat(joinPath(dirPath, file))).isDirectory()) {
+            if (await isDirectory(joinPath(dirPath, file))) {
                 if (!noWayDirs.test(file)) {
                     await collect(joinPath(dirPath, file));
                 }

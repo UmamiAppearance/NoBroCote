@@ -1,7 +1,20 @@
 #!/usr/bin/env node
 
+/**
+ * CLI nor no-bro-code
+ * A lot of ideas for this interface (and also small code parts
+ * are inspired/adopted or a copied from the great AVA test runner).
+ * If this is true for a code part it is marked as such.
+ * 
+ * This CLI is collecting all test files as defined per config or
+ * as per default settings and runs each test as a subprocess (fork).  
+ * 
+ * @see https://github.com/avajs/ava
+ */
+
 import { blue, red, underline } from "colorette";
 import { fork } from "child_process";
+import { ImportManager } from "rollup-plugin-import-manager";
 import { readdir, readFile, stat } from "fs/promises";
 import { isMatch } from "matcher";
 import { join as joinPath } from "path";
@@ -35,7 +48,7 @@ if (!Array.isArray(config.extensions)) {
 }
 
 
-// command line arguments
+// command line arguments (apart from the "--debug") similar or equal to AVA-cli)
 const coerceLastValue = value => Array.isArray(value) ? value.pop() : value;
 const FLAGS = {
     "debug": {
@@ -46,6 +59,11 @@ const FLAGS = {
     "fail-fast": {
         coerce: coerceLastValue,
         description: "Stop after first test failure",
+        type: "boolean",
+    },
+    "ignore-coherence": {
+        coerce: coerceLastValue,
+        description: "Skip test for a coherent test file",
         type: "boolean",
     },
     match: {
@@ -61,7 +79,7 @@ const FLAGS = {
     }
 };
 
-
+// this is similar but not exactly as it works in the AVA-cli
 const {argv} = yargs(hideBin(process.argv))
     .version(version)
     .usage("$0 [<pattern>...]")
@@ -116,6 +134,10 @@ if (argv.pattern) {
     }
 }
 
+if (argv.ignoreCoherence) {
+    config.ignoreCoherence = true;
+}
+
 if (argv.m) {
     config.match = argv.m;
     userDefFiles = true;
@@ -146,7 +168,7 @@ const ensureExtension = reMatch(
 
 
 
-// default match params
+// default match params (defaults match with the AVA defaults)
 let matchFiles;
 if (config.match) {
     matchFiles = str => isMatch(str, config.match);
@@ -184,7 +206,31 @@ let excludeDirs = userDefFiles
     ]);
 
 
-// file collecting fn
+// accept only files, which contain the 
+// "{ test } from "no-bro-cote" statement
+// otherwise every js file would be executed
+const isNBCFile = async filePath => {
+    if (config.ignoreCoherence) {
+        return true;
+    }
+    const source = await readFile(filePath);
+    const importManager = new ImportManager(source.toString(), filePath);
+
+    let statement;
+    try {
+        statement = importManager.selectModByName("no-bro-cote");
+    } catch {
+        statement = null;
+    }
+
+    if (!statement) {
+        return false;
+    }
+
+    return (statement.members.count && statement.members.entities.at(0).name === "test");
+};
+
+// file collecting function
 const collectFiles = async () => {
     const fileList = [];
     
@@ -203,7 +249,9 @@ const collectFiles = async () => {
                 if (!noWayFiles.test(file) && ensureExtension.test(file)) {
                     const fullPath = joinPath(dirPath, file);
                     if (!excludeDirs(fullPath) && matchFiles(fullPath)) {
-                        fileList.push(fullPath);
+                        if (await isNBCFile(fullPath)) {
+                            fileList.push(fullPath);
+                        }
                     }
                 }
             }

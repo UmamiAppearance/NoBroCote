@@ -46,7 +46,7 @@
     "picomatch": "^2.3.1",
     "promise-abortable": "^1.2.6",
     "puppeteer": "^16.2.0",
-    "rollup-plugin-import-manager": "^0.2.1",
+    "rollup-plugin-import-manager": "^0.2.2",
     "url-exist": "^3.0.1",
     "yargs": "^17.5.1"
   },

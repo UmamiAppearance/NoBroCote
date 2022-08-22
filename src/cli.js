@@ -13,25 +13,24 @@ import { FailedError } from "./utils.js";
 
 
 const CWD = process.cwd();
-const reMatch = (arr) => new RegExp(arr.join("|"));
-
 
 // config values
-const { nbConfig, version } = await (async () => {
-    const config = JSON.parse(
+const { config, version } = await (async () => {
+    const conf = JSON.parse(
         await readFile(
             new URL("../package.json", import.meta.url)
         )
     );
     return {
-        nbConfig: config["no-bro-cote"] || {},
-        version: config.version
+        config: conf["no-bro-cote"] || {},
+        version: conf.version
     };
 })();
 
-if (!Array.isArray(nbConfig.extensions)) {
-    nbConfig.extensions = ["js", "mjs"];
+if (!Array.isArray(config.extensions)) {
+    config.extensions = ["js", "mjs"];
 }
+
 
 // command line arguments
 const coerceLastValue = value => Array.isArray(value) ? value.pop() : value;
@@ -60,21 +59,6 @@ const FLAGS = {
 };
 
 
-// files
-const noWayDirs = reMatch([
-    "^\\.git(:?hub)?$",
-    "^node_modules$",
-    "^_[^_]"
-]);
-
-const noWayFiles = reMatch([
-    "^_[^_]"
-]);
-
-const ext = `@(${nbConfig.extensions.join("|")})`;
-
-const ensureExtension = reMatch(nbConfig.extensions.map(ext => `\\.${ext}$`));
-
 const {argv} = yargs(hideBin(process.argv))
     .version(version)
     .usage("$0 [<pattern>...]")
@@ -85,9 +69,10 @@ const {argv} = yargs(hideBin(process.argv))
         type: "string",
     }));
 
+
+// apply command line arguments
 const runnerArgs = [];
 let userDefFiles = false;
-console.log(argv);
 
 if (argv.debug) {
     runnerArgs.push("debug");
@@ -95,12 +80,13 @@ if (argv.debug) {
 }
 
 if (argv.pattern) {
-    nbConfig.files = argv.pattern;
+    config.files = argv.pattern;
     userDefFiles = true;
 }
 
 if (argv.m) {
-    nbConfig.match = argv.m;
+    config.match = argv.m;
+    userDefFiles = true;
 }
 
 if (argv.failFast) {
@@ -108,14 +94,35 @@ if (argv.failFast) {
 }
 
 
+// files
+const reMatch = (arr) => new RegExp(arr.join("|"));
+
+const noWayDirs = reMatch([
+    "^\\.git(:?hub)?$",
+    "^node_modules$",
+    "^_[^_]"
+]);
+
+const noWayFiles = reMatch([
+    "^_[^_]"
+]);
+
+const ext = `@(${config.extensions.join("|")})`;
+
+const ensureExtension = reMatch(
+    config.extensions
+        .map(ext => `\\.${ext}$`)
+);
+
+
+
 // default match params
 let matchFiles;
-if (nbConfig.match) {
-    matchFiles = str => isMatch(str, nbConfig.match);
-    userDefFiles = true;
+if (config.match) {
+    matchFiles = str => isMatch(str, config.match);
 } else {
     matchFiles = userDefFiles
-        ? picomatch(nbConfig.files)
+        ? picomatch(config.files)
         : picomatch([
             `test.${ext}`,
             `src/test.${ext}`,

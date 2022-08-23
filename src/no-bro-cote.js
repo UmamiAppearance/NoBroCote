@@ -355,7 +355,7 @@ class NoBroCote {
         const { access, readFileSync, F_OK } = await import("fs");
         const { join, sep } = await import("path");
         const { fileURLToPath } = await import("url");
-        const { ImportManager } = await import("rollup-plugin-import-manager");
+        const { ImportManager } = await import("import-manager");
         const { default: urlExist }  = await import("url-exist");
 
         const group = this.fileName

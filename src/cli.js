@@ -14,12 +14,12 @@
 
 import { blue, red, underline } from "colorette";
 import { fork } from "child_process";
-import { ImportManager } from "rollup-plugin-import-manager";
 import { readdir, readFile, stat } from "fs/promises";
 import { isMatch } from "matcher";
 import { join as joinPath } from "path";
 import picomatch from "picomatch";
 import AbortablePromise from "promise-abortable";
+import ImportManager from "import-manager";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { FailedError } from "./utils.js";

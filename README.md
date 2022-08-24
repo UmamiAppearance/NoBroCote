@@ -199,7 +199,7 @@ The js file could now be called with node from the projects root directory:
 node ./path/to/file.js
 ```
 
-Much more convenient is to use the CLI, by adding it to the test section of your ``package.json``
+Much more convenient is to use the [CLI](#cli), by adding it to the test section of your ``package.json``
 
 ```json
 "scripts": {

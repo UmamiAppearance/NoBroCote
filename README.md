@@ -326,14 +326,14 @@ To ignore files, prefix the pattern with an `!` (exclamation mark).
       "mjs"
     ],
     "failFast": true,
-		"files": [
-			"test/**/*",
-			"!test/exclude-files-in-this-directory",
-			"!**/exclude-files-with-this-name.*"
-		],
+    "files": [
+      "test/**/*",
+      "!test/exclude-files-in-this-directory",
+      "!**/exclude-files-with-this-name.*"
+    ],
     "ignoreCoherence": false, 
     "serial": true
-	}
+  }
 }
 ```
 

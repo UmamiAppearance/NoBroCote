@@ -40,15 +40,15 @@ import { test } from "no-bro-code";
 
 
 ## Creating Test Units
-After initialization it is time to create a test unit. A test unit takes:  
+Now it is time to create a test unit. A unit takes:  
 - ``name`` _\<string\>_ Unit Name
 - ``expect`` _\<*\>_ Expected result 
 - ``fn`` _\<Function\>_ The actual test. A function for testing.
 - ``fnArgs`` _\<...any\>_ Optional parameters for the function. 
 
 The function has access to the html page. It acts like a single function you would execute in a script tag. It has access to all scripts and modules passed via ``addScript`` or ``addImport``. The function can be asynchronous or not. It must return something which can be compared with the expected result.  
-**Example:**  
 
+**Example:**  
 ```js
 test.makeUnit(
     "my first unit",
@@ -98,7 +98,7 @@ Sometimes it is necessary to test if an error is thrown. The test should throw t
 _Those are:
  - ``e|`` (for allowing all errors)
  - ``e|EvalError``
- - ``e|InternalError``// optional
+ - ``e|InternalError``
  - ``e|RangeError``
  - ``e|ReferenceError``
  - ``e|SyntaxError``

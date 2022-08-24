@@ -1,9 +1,10 @@
-import NoBroCote from "../src/no-bro-cote.js";
+import { test } from "../src/index.js";
 
-const testErrors = new NoBroCote(import.meta.url);
+test.adjustModules = false;
+test.expectFailure = true;
 
-testErrors.makeUnit(
-    "defaultExample",
+test.makeUnit(
+    "default example",
     "false",
     () => {
         document.body.textContent = "true";
@@ -11,8 +12,8 @@ testErrors.makeUnit(
     }
 );
 
-testErrors.makeUnit(
-    "noConvertTypeExample",
+test.makeUnit(
+    "no convert type example",
     "42",
     async () => {
         document.body.textContent = "42";
@@ -21,8 +22,8 @@ testErrors.makeUnit(
 );
 
 
-testErrors.makeUnit(
-    "notExample",
+test.makeUnit(
+    "not example",
     "!|dog",
     () => {
         document.body.textContent = "dog";
@@ -30,8 +31,8 @@ testErrors.makeUnit(
     }
 );
 
-testErrors.makeUnit(
-    "notWithTypeConversionExample",
+test.makeUnit(
+    "not - with type conversion",
     "!=|42",
     () => {
         document.body.textContent = "42";
@@ -39,8 +40,8 @@ testErrors.makeUnit(
     }
 );
 
-testErrors.makeUnit(
-    "orExample",
+test.makeUnit(
+    "or example",
     "||cat|dog|bird",
     async () => {
         document.body.textContent = "fish";
@@ -48,8 +49,8 @@ testErrors.makeUnit(
     }
 );
 
-testErrors.makeUnit(
-    "exceptionExample",
+test.makeUnit(
+    "exception example",
     "e|TypeError",
     () => {
         // eslint-disable-next-line no-undef
@@ -58,4 +59,4 @@ testErrors.makeUnit(
     }
 );
 
-await testErrors.init(false);
+test.init();

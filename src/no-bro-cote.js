@@ -1,21 +1,10 @@
 /**
  * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.1.4
+ * @version 0.2.0
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
-
-
-// Imports are are dynamically added. Just as a reminder, 
-// they are listed here:
-// -------------------------------------------------- //
-// import { NoBroCoteHTMLServer } from "./server.js";
-// import { readFileSync } from "fs";
-// import { path } from "path";
-// import { fileURLToPath } from "url";
-// import urlExist from "url-exist";
-// -------------------------------------------------- //
 
 
 /**
@@ -26,15 +15,19 @@
 class NoBroCote {
 
     /**
-     * Create a new NoBroCode instance. 
-     * Kindly pass 'import.meta.url'
-     * @param {string} fileName - import.meta.url
+     * Creates a new NoBroCode instance.
+     * @param {string} fileName - File path of the test file. 
+     * @param {boolean} [debug=false] - If true, the debug mode is active. 
+     * @param {boolean} [failFast=false] - If true, the first fail will cause the whole testing to stop.
      */
-    constructor(fileName) {
+    constructor(fileName, debug=false, failFast=false) {
 
         // name of the instance file
         this.fileName = fileName;
-        
+
+        this.debug = debug;
+        this.failFast = failFast;
+
         // results obj for the test runner
         this.results = {
             tests: 0,
@@ -56,7 +49,7 @@ class NoBroCote {
 
         // true if first called by node, false during tests 
         this.initialize = typeof window === "undefined";
-        
+
         // store project root for initialization
         if (this.initialize) {
             this.rootDir = process.cwd();
@@ -68,7 +61,10 @@ class NoBroCote {
         this.units = new Object();
 
         // set port
-        this.port = 9999;
+        this.port = 10000;
+
+        // set html page
+        this.htmlPage = null;
     }
 
 
@@ -76,7 +72,6 @@ class NoBroCote {
      * Additional scripts to be loaded into the page,
      * before testing. It requires an object which can 
      * have the following keys (as defined by Puppeteer):
-     * cf. https://devdocs.io/puppeteer/
      * 
      *  - url <string> URL of a script to be added.
      *  - path <string> Path to the JavaScript file to be injected into frame. If path is a relative path, then it is resolved relative to projects root directory (cwd).
@@ -85,7 +80,8 @@ class NoBroCote {
      * 
      * You can also pass an array of objects.
      * 
-     * @param {(Object|Object[])} script - Script object (or array of objects) as required by puppeteer  
+     * @param {(Object|Object[])} script - Script object (or array of objects) as required by puppeteer
+     * @see https://devdocs.io/puppeteer/#pageaddscripttagoptions
      */
     addScript(script) {
         if (!this.initialize) {
@@ -141,28 +137,37 @@ class NoBroCote {
      *    ==| equality, with type conversion 
      */
     #assert(result, expect, unit, input) {
-        const error = () => this.#makeError(input, result, expect, unit);
+        
+        let passed = true;
+        
+        const error = () => {
+            const errorMessage = "assertion failed";
+            passed = false;
+            this.#makeError(input, result, errorMessage, expect, unit);
+        };
 
-        if (String(expect).match(/^!\|/)) { 
+        if ((/^!\|/).test(String(expect))) { 
             if (result === expect.replace(/^!\|/, "")) error();
         }
         
-        else if (String(expect).match(/^!=\|/)) {
+        else if ((/^!=\|/).test(String(expect))) {
             if (result == expect.replace(/^!=\|/, "")) error();
         }
         
-        else if (String(expect).match(/^\|\|/)) {
+        else if ((/^\|\|/).test(String(expect))) {
             const valid = expect.split("|").slice(2);
             if (!valid.includes(result)) error();
         }
 
-        else if (String(expect).match(/^==\|/)) {
+        else if ((/^==\|/).test(String(expect))) {
             if (result != expect.replace(/^==\|/, "")) error();
         }
         
         else if (result !== expect) {
             error();
         }
+
+        return passed;
     }
 
 
@@ -177,7 +182,7 @@ class NoBroCote {
      * or 'addImport'.
      * 
      * The function can be asynchronous or not. It must return 
-     * something which can be compared with the expected result.
+     * something which can NoBroCoteHTMLServer compared with the expected result.
      * 
      * @param {string} name - Unit Name
      * @param {*} expect - expected result 
@@ -191,29 +196,51 @@ class NoBroCote {
         }
 
         this.units[name] = async () => {
+            
+            let err;
+            let passed;
             let result;
+
             const inputStr = `Function: '${fn.name ? fn.name : "anonymous"}', Arguments: ${fnArgs.length ? fnArgs.join(", ") : "none"}`;
             
             try {
                 result = await fn(...fnArgs);
-            } catch(err) {
-                const exception = `${err.name} happened, while running ${name}: '${err.message}'`;
-                
-                let throwErr = true;
-                
-                if (String(expect).match(/^e|/)) {
-                    const errType = expect.replace(/^(e\|)/, "");
-                    if (this.errorList.includes(errType) && (errType === "" || err.name === errType)) {
-                        throwErr = false;
-                    }
-                }
+            } catch (e) {
+                err = e;
+            }
 
-                if (throwErr) {
-                    this.#makeError(inputStr, exception, expect, name);
+            if (err) {
+
+                // test if an error is expected
+                let expectErr = (/^e\|/).test(String(expect));
+                const errType = expect.replace(/^(e\|)/, "");
+
+                // test if the error is generic or in the error list
+                if (expectErr &&
+                    this.errorList.includes(errType) && 
+                    (errType === "" || err.name === errType))
+                {
+                    passed = true;   
+                }
+                
+                // if no error was expected create an error case
+                else {
+                    this.#makeError(
+                        inputStr,
+                        `${err.name} happened, while running '${name}'`,
+                        err.message,
+                        expect,
+                        name
+                    );
+                    passed = false;
                 }
             }
 
-            if (result) this.#assert(result, expect, name, inputStr);
+            else {
+                passed = this.#assert(result, expect, name, inputStr);
+            }
+             
+            console.log("|RESULT|", passed, name);
         };
     }
 
@@ -222,15 +249,18 @@ class NoBroCote {
      * Helper function. Creates an error which is added
      * to the results object. 
      */
-    #makeError(input, output, expected, unit) {
+    #makeError(input, output, errorMessage, expected, unit) {
         
         this.results.errors ++;
         const errObj = {
-            input: input,
-            output: output,
-            expected: expected,
-            unit: unit
+            input,
+            output,
+            errorMessage,
+            expected,
+            unit
         };
+
+        console.log("|ERROR|", JSON.stringify(errObj, null, 4));
         
         this.results.errorMessages[unit] = errObj;
     }
@@ -246,29 +276,68 @@ class NoBroCote {
         if (!this.initialize) {
             return;
         }
-        
-        let content, relClassPath;
-        [content, relClassPath] = await this.#compileServerVars();
+
+        const { bold, red } = await import("colorette");
+        const { content, group } = await this.#compileServerVars();
 
         const server = await import("../src/server.js");
-        this.server = new server.NoBroCoteHTMLServer(relClassPath, this.port);
+        this.server = new server.NoBroCoteHTMLServer(
+            this.port,
+            this.htmlPage,
+            group,
+            this.debug,
+            this.expectFailure,
+            this.failFast
+        );
 
-        const result = await this.server.run(content, this.additionalScripts);
+        let result;
+        if (this.failFast) {
+            try {
+                result = await this.server.run(content, this.additionalScripts);
+            } catch {
+                process.exit(2);
+            }
+        } else {
+            result = await this.server.run(content, this.additionalScripts);
+        }
 
         let exitCode = 0;
         if (!result.errors) {
             delete result.errorMessages;
         }
 
-        console.log("-------\nresults");
-        console.log(JSON.stringify(result, null, 4));
+        const preLog = () => [
+            "    •",
+            group,
+            ">"
+        ];
 
-        if (result.errors) {
-            console.error(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`);
+        const logResult = (result) => {
+            console.log(
+                ...preLog(),
+                bold(`results\n${JSON.stringify(result, null, 4)}`)
+            );
+        };
+
+        const logError = (...args) => {
+            console.log(...[...preLog(), ...args].map(arg => bold(red(arg))));
+        };
+
+        if (this.debug) {
+            logResult(result);
+        }
+
+        if (result.errors && !this.expectFailure) {
+            logResult(result);
+            logError(
+                red(`${result.errors} ${(result.errors > 1) ? "errors" : "error"} occurred!`)
+            );
             exitCode = 1;
-        } 
-        if (exitCode === 0) {
-            console.log("Everything seems to work fine.");
+        } else if (!result.errors && this.expectFailure) {
+            logError(
+                red("Failures were expected, but no errors were thrown.")
+            );
+            exitCode = 1;
         }
         
         process.exit(exitCode);
@@ -283,21 +352,35 @@ class NoBroCote {
     async #compileServerVars() {
         
         // import libraries
-        const fs = await import("fs");
-        const path = await import("path");
-        const url = await import("url");
+        const { access, readFileSync, F_OK } = await import("fs");
+        const { join, sep } = await import("path");
+        const { fileURLToPath } = await import("url");
+        const { ImportManager } = await import("import-manager");
         const { default: urlExist }  = await import("url-exist");
 
+        const group = this.fileName
+            .split(sep).at(-1)
+            .replace(/\.[^/.]+$/, "")
+            .replace(/test-/, "")
+            .replace(/\.test/, "");
+
+        // test if top level
+        const topLevel = /^file/.test(this.fileName);
 
         // get path of script
-        const instanceFilePath = url.fileURLToPath(this.fileName);
+        const instanceFilePath = topLevel ? fileURLToPath(this.fileName) : this.fileName;
 
         // get path of this class
-        const classFilePath = url.fileURLToPath(import.meta.url);
-        const classFileName = classFilePath.split("/").at(-1);
+        let classFilePath = fileURLToPath(import.meta.url);
+        
+        if (!topLevel) {
+            classFilePath = classFilePath.replace("no-bro-cote.js", "index.js");
+        }
+        const classFileName = classFilePath.split(sep).at(-1);
 
         // get path relative to root
         const relClassPath = classFilePath.replace(this.rootDir, "");
+
         if (relClassPath.length === classFilePath) {
             throw new Error(`Unable to set relative import path. Is NoBroCote a subfolder of root directory '${this.rootDir}'?`);
         }
@@ -308,28 +391,32 @@ class NoBroCote {
 
         // count the tree of sub folders to root
         // (minus leading slash, minus filename)
-        const stepsToRoot = relInstancePath.split("/").length - 2;
+        const stepsToRoot = relInstancePath.split(sep).length - 2;
         let dirDots = (stepsToRoot) ? "../".repeat(stepsToRoot).slice(0,-1) : ".";
 
         // get content
-        let content = fs.readFileSync(instanceFilePath).toString();
+        let content = readFileSync(instanceFilePath).toString();
         
-        // replace import statement ([node] or relative [file])
-        // TODO: the replacement of the relative path is most
-        // likely redundant -> confirm that
-        const regexpNode = new RegExp("^import.*no-bro-cote.*$", "m");
-        const regexpFile = new RegExp(`^import.*${classFileName}.*$`, "m");
-        const importStatement = `import NoBroCote from "${dirDots}${relClassPath}";`;
-        content = content
-            .replace(regexpNode, importStatement)
-            .replace(regexpFile, importStatement);
-
-        // find instance variable
-        const varMatch = content.match(/.*(?=\s?=\s?new NoBroCote)/m);
-        if (!varMatch) {
-            throw new Error(`Could not find instance filename in ${relInstancePath}`);
+        // adjust import statements to relative local statements
+        if (this.adjustModules !== false) {
+            const importManager = new ImportManager(content, classFilePath);
+            const statement = importManager.selectModByName("no-bro-cote");
+            statement.methods.renameModule(`${dirDots}${relClassPath}`, "string");
+            importManager.commitChanges(statement);
+            content = importManager.code.toString();
         }
-        const instanceVar = varMatch[0].trim().split(/\s/).at(-1);
+            
+        // find instance variable
+        let instanceVar;
+        if (topLevel) {
+            const varMatch = content.match(/.*(?=\s?=\s?new NoBroCote)/m);
+            if (!varMatch) {
+                throw new Error(`Could not find instance filename in ${relInstancePath}`);
+            }
+            instanceVar = varMatch[0].trim().split(/\s/).at(-1);
+        } else {
+            instanceVar = "test";
+        }
 
         // test import paths
         for (const statement of this.imports) {
@@ -341,7 +428,7 @@ class NoBroCote {
             const destination = pathMatch[1];
 
             // handle urls
-            if (destination.match(/^(?:http(s)?:\/\/)/)) {
+            if ((/^(?:http(s)?:\/\/)/).test(destination)) {
 
                 if (!(await urlExist(destination))) {
                     throw new Error(`URL '${destination}' cannot be resolved`);
@@ -350,9 +437,9 @@ class NoBroCote {
 
             // handle relative imports
             else {
-                const importPath = path.join(this.rootDir, destination);
+                const importPath = join(this.rootDir, destination);
                 
-                fs.access(importPath, fs.F_OK, (err) => {
+                access(importPath, F_OK, (err) => {
                     if (err) {
                         throw new Error(`Cannot resolve path '${importPath}'`);
                     }
@@ -363,7 +450,11 @@ class NoBroCote {
         const imports = this.imports.join("\n");
         content = `\n${imports}\n${content}\nwindow.testInstance = ${instanceVar};\n`;
 
-        return [content, relClassPath];
+        if (!this.htmlPage) {
+            this.htmlPage = "." + relClassPath.replace(classFileName, "barebone.html");
+        }
+
+        return { content, group };
     }
 
 
@@ -378,8 +469,6 @@ class NoBroCote {
             
             const unitName = unitNames.shift();            
             if (unitName) {
-                const header = `testing unit: '${unitName}'`; 
-                console.log(`${header}:\n      ${"-".repeat(header.length + 5)}`);
                 this.results.tests ++;
                 const unitFN = this.units[unitName];
                 await unitFN();

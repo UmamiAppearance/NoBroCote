@@ -1,15 +1,15 @@
-import NoBroCote from "../src/no-bro-cote.js";
+import { test } from "../src/index.js";
 
-const testSuccess = new NoBroCote(import.meta.url);
+test.adjustModules = false;
 
 // test injection of a regular script tag
-testSuccess.addScript({path: "./node_modules/wade/dist/wade.min.js"});
+test.addScript({path: "./node_modules/wade/dist/wade.min.js"});
 
 // test injection relative module
-testSuccess.addImport("import { appendix } from './test/testlibs/appendix.js';");
+test.addImport("import { appendix } from './test/fixtures/testlibs/appendix.js';");
 
-testSuccess.makeUnit(
-    "defaultExample",
+test.makeUnit(
+    "default example",
     "true",
     () => {
         document.body.textContent = "true";
@@ -17,8 +17,9 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
-    "orTest",
+
+test.makeUnit(
+    "or test",
     "||cat|dog|bird",
     () => {
         const pickPet = () => ["cat", "dog", "bird"].at(Math.floor(Math.random()*3));
@@ -27,8 +28,8 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
-    "useRegularScript",
+test.makeUnit(
+    "regular script tag",
     1,
     () => {
         // eslint-disable-next-line no-undef
@@ -39,8 +40,8 @@ testSuccess.makeUnit(
 );
 
 
-testSuccess.makeUnit(
-    "testRelativeImport",
+test.makeUnit(
+    "relative import",
     "wow",
     async () => {
         // eslint-disable-next-line no-undef
@@ -50,8 +51,8 @@ testSuccess.makeUnit(
 );
 
 
-testSuccess.makeUnit(
-    "convertTypeExample",
+test.makeUnit(
+    "convert type example",
     "==|42",
     async () => {
         document.body.textContent = "42";
@@ -60,8 +61,8 @@ testSuccess.makeUnit(
 );
 
 
-testSuccess.makeUnit(
-    "notExample",
+test.makeUnit(
+    "not example",
     "!|dog",
     () => {
         document.body.textContent = "cat";
@@ -69,8 +70,8 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
-    "notWithTypeConversionExample",
+test.makeUnit(
+    "not - with type conversion",
     "!=|42",
     () => {
         document.body.textContent = "4.2";
@@ -78,17 +79,9 @@ testSuccess.makeUnit(
     }
 );
 
-testSuccess.makeUnit(
-    "orExample",
-    "||cat|dog|bird",
-    async () => {
-        document.body.textContent = "dog";
-        return document.body.textContent;
-    }
-);
 
-testSuccess.makeUnit(
-    "expectErrorTest",
+test.makeUnit(
+    "expect error",
     "e|TypeError",
     () => {
         throw new TypeError("I am glad this error was raised!");
@@ -101,17 +94,17 @@ class ValidationError extends Error {
         this.name = "ValidationError";
     }
 }
-testSuccess.errorList.push(ValidationError.name);
-testSuccess.makeUnit(
-    "customError",
+test.errorList.push(ValidationError.name);
+test.makeUnit(
+    "custom error",
     "e|ValidationError",
     () => {
         throw new ValidationError("Invalid!");
     }
 );
 
-testSuccess.makeUnit(
-    "exceptionExample",
+test.makeUnit(
+    "exception example",
     "e|ReferenceError",
     () => {
         // eslint-disable-next-line no-undef
@@ -121,4 +114,4 @@ testSuccess.makeUnit(
 );
 
 
-await testSuccess.init(false);
+test.init();

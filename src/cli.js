@@ -15,7 +15,6 @@
 import { blue, red, underline } from "colorette";
 import { fork } from "child_process";
 import { readdir, readFile, stat } from "fs/promises";
-import { isMatch } from "matcher";
 import { join as joinPath } from "path";
 import picomatch from "picomatch";
 import AbortablePromise from "promise-abortable";
@@ -66,11 +65,6 @@ const FLAGS = {
         description: "Skip test for a coherent test file",
         type: "boolean",
     },
-    match: {
-        alias: "m",
-        description: "Only run tests with matching title (can be repeated)",
-        type: "string",
-    },
     serial: {
         alias: "s",
         coerce: coerceLastValue,
@@ -80,15 +74,19 @@ const FLAGS = {
 };
 
 // this is similar but not exactly as it works in the AVA-cli
-const {argv} = yargs(hideBin(process.argv))
+const { argv } = yargs(hideBin(process.argv))
     .version(version)
     .usage("$0 [<pattern>...]")
     .command("* [<pattern>...]", "Run tests", yargs => yargs.options(FLAGS).positional("pattern", {
         array: true,
         // TODO: Adjust text
-        describe: "Select which test files to run. Leave empty if you want no-bro-cote to run all test files as per your configuration. Accepts glob and minimatch patterns, directories that (recursively) contain test files, and relative or absolute file paths.",
+        describe: "Select which test files to run. Leave empty if you want to run all test files as per your configuration. Accepts glob and minimatch patterns, directories that (recursively) contain test files, and relative or absolute file paths.",
         type: "string",
-    }));
+    }))
+    .example("$0")
+    .example("$0 test.js")
+    .example("$0 ./test/")
+    .example("$0 \"**/**test.js\"");
 
 
 // apply command line arguments
@@ -138,11 +136,6 @@ if (argv.ignoreCoherence) {
     config.ignoreCoherence = true;
 }
 
-if (argv.m) {
-    config.match = argv.m;
-    userDefFiles = true;
-}
-
 if (argv.failFast) {
     runnerArgs.push("failFast");
 }
@@ -169,24 +162,19 @@ const ensureExtension = reMatch(
 
 
 // default match params (defaults match with the AVA defaults)
-let matchFiles;
-if (config.match) {
-    matchFiles = str => isMatch(str, config.match);
-} else {
-    matchFiles = userDefFiles
-        ? picomatch(config.files)
-        : picomatch([
-            `test.${ext}`,
-            `src/test.${ext}`,
-            `source/test.${ext}`,
-            `**/test-*.${ext}`,
-            `**/*.spec.${ext}`,
-            `**/*.test.${ext}`,
-            `**/test/**/*.${ext}`,
-            `**/tests/**/*.${ext}`,
-            `**/__tests__/**/*.${ext}`
-        ]);
-}
+const matchFiles = userDefFiles
+    ? picomatch(config.files)
+    : picomatch([
+        `test.${ext}`,
+        `src/test.${ext}`,
+        `source/test.${ext}`,
+        `**/test-*.${ext}`,
+        `**/*.spec.${ext}`,
+        `**/*.test.${ext}`,
+        `**/test/**/*.${ext}`,
+        `**/tests/**/*.${ext}`,
+        `**/__tests__/**/*.${ext}`
+    ]);
 
 let excludeDirs = userDefFiles
     ? () => false

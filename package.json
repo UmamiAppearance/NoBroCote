@@ -43,7 +43,6 @@
   "dependencies": {
     "colorette": "^2.0.19",
     "import-manager": "^0.1.1",
-    "matcher": "^5.0.0",
     "picomatch": "^2.3.1",
     "promise-abortable": "^1.2.6",
     "puppeteer": "^16.2.0",

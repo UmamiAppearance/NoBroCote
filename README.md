@@ -27,9 +27,11 @@ npm install no-brote-cote --save-dev
 ```
 
 ## Usage
-The first step is to create a new ``.js`` file (most likely in your test folder).
+The first step is to create a new ``.js`` file (most likely in your test folder), [import](#importing) a `test`-instance, create one ore more a [test units](#creating-test-units), finally [initialize](#initializing-the-tests).
     
-**(Psst. No 'time' for reading? Jump straight to a basic [sample code](https://github.com/UmamiAppearance/NoBroCote#Basic-Sample-Code).)**
+**(Psst. No 'time' for reading? Jump straight to a basic [sample code](https://github.com/UmamiAppearance/NoBroCote#Basic-Sample-Code).)**  
+  
+To run the test(s), you can use the [**CLI**](#cli).
 
 
 ### Importing

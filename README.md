@@ -319,7 +319,7 @@ To ignore files, prefix the pattern with an `!` (exclamation mark).
 
 ```json
 {
-	"no-bro-cote": {
+  "no-bro-cote": {
     "debug": false,
     "extensions": [
       "js",

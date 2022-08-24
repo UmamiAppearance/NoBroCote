@@ -1,6 +1,6 @@
 {
   "name": "no-bro-cote",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Node Browser Code testing. Run unit tests on your JavaScript code for the browser.",
   "main": "./src/index.js",
   "bin": {
@@ -18,7 +18,8 @@
   },
   "scripts": {
     "test": "./src/cli.js --ignore-coherence",
-    "lint": "eslint ./src/"
+    "lint": "eslint ./src/*.js",
+    "lint:fix": "eslint ./src/*.js --fix"
   },
   "repository": {
     "type": "git",

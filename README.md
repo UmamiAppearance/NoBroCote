@@ -213,7 +213,7 @@ Much more convenient is to use the [CLI](#cli), by adding it to the test section
 import { test } from "no-bro-cote";
 
 // imports (optional)
-test.addScript({at the end of the file
+test.addScript({
     path: "./path/to/script"
 });
 

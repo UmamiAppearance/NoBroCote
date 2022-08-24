@@ -79,7 +79,6 @@ const { argv } = yargs(hideBin(process.argv))
     .usage("$0 [<pattern>...]")
     .command("* [<pattern>...]", "Run tests", yargs => yargs.options(FLAGS).positional("pattern", {
         array: true,
-        // TODO: Adjust text
         describe: "Select which test files to run. Leave empty if you want to run all test files as per your configuration. Accepts glob and minimatch patterns, directories that (recursively) contain test files, and relative or absolute file paths.",
         type: "string",
     }))
@@ -349,11 +348,3 @@ const exitCode = argv.serial
     : await defaultRun(fileList, runnerArgs);
 
 process.exit(exitCode);
-
-/*
-TODO: remove from here and ad to docs
-OPTIONS:
-"files", (str[])
-"match", (str) -> overwrites files
-"extensions" (array)
-*/

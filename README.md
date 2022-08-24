@@ -7,7 +7,7 @@
   
 **NoBroCote** is designed for the automation of testing JavaScript code which is made for the browser. It provides methods to run the code units inside of a headless browser via [Puppeteer](https://github.com/puppeteer/puppeteer). Unlike many of the big players in code testing it is not a swiss army knife for every purpose, but particularly to test the code designed for the browser via node, without having to open a browser, and also without writing the test environment from scratch every time.  
   
-No big learning curve involved! A Unit takes a name, an expected result and a function, which is the test, that's all. 
+_No big learning curve involved!_ A Unit takes a name, an expected result and a function, which is the test, that's all. 
 
 ## Use case
 This software is designed to test if an application for the browser is correctly working.

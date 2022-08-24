@@ -311,7 +311,7 @@ When using `npm test`, you can pass positional arguments directly `npm test test
 
 
 ### Configuration
-All of the [CLI options][CLI] can be configured in the `no-bro-cote` section of your `package.json` file. This allows you to modify the default behavior of the `no-bro-cote` command, so you don't have to repeatedly type the same options on the command prompt.
+All of the **CLI** [options](#options) can be configured in the `no-bro-cote` section of your `package.json` file. This allows you to modify the default behavior of the `no-bro-cote` command, so you don't have to repeatedly type the same options on the command prompt.
 
 To ignore files, prefix the pattern with an `!` (exclamation mark).
 

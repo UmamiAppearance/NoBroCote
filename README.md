@@ -19,27 +19,27 @@ This software is designed to test if an application for the browser is correctly
 
 _It is not suitable for UI tests_, reacting to (touch) input and anything like that, or testing if the code is running consistent over different browsers.
 
-# Installation
+## Installation
 **NoBroCote** is made for unit tests with node.js, therefore a installation via npm is advisable. As it is most likely is only needed for testing with the ``--save-dev`` flag.
 
 ```sh
 npm install no-brote-cote --save-dev
 ```
 
-# Usage
+## Usage
 The first step is to create a new ``.js`` file (most likely in your test folder).
     
 **(Psst. No 'time' for reading? Jump straight to a basic [sample code](https://github.com/UmamiAppearance/NoBroCote#Basic-Sample-Code).)**
 
 
-## Importing
+### Importing
 Inside of your js-file, import a `test`-instance.  
 ```js
 import { test } from "no-bro-code";
 ```
 
 
-## Creating Test Units
+### Creating Test Units
 Now it is time to create a test unit. A unit takes:  
 - ``name`` _\<string\>_ Unit Name
 - ``expect`` _\<*\>_ Expected result 
@@ -117,7 +117,7 @@ test.makeUnit(
 );
 ```
 
-### Custom Errors
+#### Custom Errors
 Custom errors can be also be added to error list:
 ```js
 // first create the error (or import it from somewhere else)
@@ -142,9 +142,9 @@ test.expectFailure = true;
 \- at least one unit has to fail.
 
 
-## Importing Scripts and Modules
+### Importing Scripts and Modules
 
-### addScript
+#### addScript
 This method appends a script tag to the html page. The method requires an object which can have the following keys (as defined by **Puppeteer**):
  - ``url`` _\<string\>_ URL of a script to be added.
  - ``path`` _\<string\>_ Path to the JavaScript file to be injected into frame. If path is a relative path, then it is resolved relative to projects root directory (cwd).
@@ -161,7 +161,7 @@ test.addScript({
 
 Also see: [devdocs.io/puppeteer](https://devdocs.io/puppeteer/).
 
-### addImport
+#### addImport
 This method provides ES6 imports for the test runner. In contrast to ``addScripts``, this method needs a valid ES6 import statement as a string. These imports are directly accessible by the test units as they are part of one script tag in the browser.
  - Relative imports are resolved relative to the projects root directory (cwd).
  - Multiple imports can be passed as an array. _A possible **example** may be as follows:_
@@ -170,21 +170,21 @@ This method provides ES6 imports for the test runner. In contrast to ``addScript
 test.addImport('import myModule from "./path/to/module"');
  ```
 
-## HTML Page
+### HTML Page
 By default a very skeleton of an HTML page is getting opened, on which the tests are getting injected. But also it is possible to load a custom HTML page. The page has to be reachable from the projects root folder and its path has to be declared relative to root. Assuming a HTML page with the path `./test/fixtures/page.html` the declaration inside of the test file may look as follows:
 
 ```js
 test.htmlPage = "./test/fixtures/page.html";
 ```
 
-## Server Port
+### Server Port
 By default the server runs on port ``10000``. If the port is already in use the port number is raised by one if an open port was found. The initial port can be changed, if this is a bad starting point for any reason. Simply declare another port in that case.
 ```js
 test.port = 8080;
 ```
 
 
-## Initializing the tests
+### Initializing the tests
 After all imports are done and all units are declared, all that is left to do is to set the following line at the end of the file:
 
 ```js
@@ -251,7 +251,7 @@ test.makeUnit(
 test.init();
 ```
 
-# CLI
+## CLI
 The **CLI** is for the most part inspired/adopted from the great [AVA](https://github.com/avajs/ava/blob/main/docs/05-command-line.md) test runner.
 
 ```console
@@ -308,7 +308,7 @@ Files inside `node_modules` and files inside directories starting with `.git` ar
 When using `npm test`, you can pass positional arguments directly `npm test test2.js`, but flags needs to be passed like `npm test -- --debug`.
 
 
-## Configuration
+### Configuration
 All of the [CLI options][CLI] can be configured in the `no-bro-cote` section of your `package.json` file. This allows you to modify the default behavior of the `no-bro-cote` command, so you don't have to repeatedly type the same options on the command prompt.
 
 To ignore files, prefix the pattern with an `!` (exclamation mark).
@@ -337,7 +337,7 @@ To ignore files, prefix the pattern with an `!` (exclamation mark).
 
 Arguments passed to the CLI will always take precedence over the CLI options configured in `package.json`.
 
-### Options
+#### Options
 
 - `debug`: enables debug mode if set to true. Let's no-bro-cote run the tests serially and provides verbose console output
 - `extensions`: extensions of test files. Setting this overrides the default `["cjs", "js"]` value
@@ -350,7 +350,7 @@ Arguments passed to the CLI will always take precedence over the CLI options con
 _Note that all arguments provided on the CLI overrides the options configured in `package.json`._
 
 
-# License
+## License
 This work is licensed under [GPL-3.0](https://opensource.org/licenses/GPL-3.0).
 
 

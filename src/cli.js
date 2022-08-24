@@ -109,7 +109,7 @@ if (argv.pattern) {
             }
             
             // if the path contains no * and it is a directory
-            // two ** will get appended to convert it into a 
+            // one * will get appended to convert it into a 
             // valid minimatch patter
             if (!pattern.includes("*")) {
                 let isDir = false;
@@ -119,7 +119,7 @@ if (argv.pattern) {
                     continue;
                 }
                 if (isDir) {
-                    pattern = joinPath(pattern, "**"); 
+                    pattern = joinPath(pattern, "*"); 
                 }
             }
         }

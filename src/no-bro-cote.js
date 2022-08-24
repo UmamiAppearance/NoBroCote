@@ -1,7 +1,7 @@
 /**
  * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.2.1
+ * @version 0.2.2
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
@@ -355,7 +355,7 @@ class NoBroCote {
         const { access, readFileSync, F_OK } = await import("fs");
         const { join, sep } = await import("path");
         const { fileURLToPath } = await import("url");
-        const ImportManager = (await import("import-manager")).default;
+        const { ImportManager } = await import("import-manager");
         const { default: urlExist }  = await import("url-exist");
 
         const group = this.fileName

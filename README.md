@@ -178,15 +178,14 @@ test.htmlPage = "./test/fixtures/page.html";
 ```
 
 ## Server Port
-By default the server runs on port ``10000``. If the port is already in use the port number is raised by one if an open port was found. The initial port can be changed, if this is a bad starting point for any reason. Simply declare another port in that case, **eg:**
+By default the server runs on port ``10000``. If the port is already in use the port number is raised by one if an open port was found. The initial port can be changed, if this is a bad starting point for any reason. Simply declare another port in that case.
 ```js
 test.port = 8080;
 ```
 
 
-
 ## Initializing the tests
-After all imports are done and all units are declared all that is left to to is to set at the end of the file the following line:
+After all imports are done and all units are declared, all that is left to do is to set the following line at the end of the file:
 
 ```js
 test.init();
@@ -212,7 +211,7 @@ Much more convenient is to use the CLI, by adding it to the test section of your
 import { test } from "no-bro-cote";
 
 // imports (optional)
-test.addScript({
+test.addScript({at the end of the file
     path: "./path/to/script"
 });
 
@@ -248,7 +247,7 @@ test.makeUnit(
 );
 
 
-// last step -> the file is now callable from the projects root directory
+// last step -> the file is now callable from the projects root directory and by the CLI
 test.init();
 ```
 
@@ -279,7 +278,7 @@ Examples:
   no-bro-cote "**/**test.js"
   ```
 
-If no patterns or matches are provided **no-bro-cote** searches for test files using the following patterns:
+If no patterns are provided **no-bro-cote** searches for test files using the following patterns:
 
 * `test.js`
 * `src/test.js`
@@ -318,7 +317,7 @@ To ignore files, prefix the pattern with an `!` (exclamation mark).
 
 ```json
 {
-	"ava": {
+	"no-bro-cote": {
     "debug": false,
     "extensions": [
       "js",

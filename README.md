@@ -29,7 +29,7 @@ npm install no-brote-cote --save-dev
 ## Usage
 The first step is to create a new ``.js`` file (most likely in your test folder), [import](#importing) a `test`-instance, create one ore more a [test units](#creating-test-units), finally [initialize](#initializing-the-tests).
     
-**(Psst. No 'time' for reading? Jump straight to a basic [sample code](https://github.com/UmamiAppearance/NoBroCote#Basic-Sample-Code).)**  
+**(Psst. No 'time' for reading? Jump straight to a basic [sample code](#basic-sample-code).)**  
   
 To run the test(s), you can use the [**CLI**](#cli).
 
@@ -96,7 +96,7 @@ test.makeUnit(
 
 
 ### Controlling Errors
-Sometimes it is necessary to test if an error is thrown. The test should throw the error, but that is the desired behavior not a failure. Similar to the just featured operators there are operators for errors (those keywords are also passed to the expect parameter).
+Sometimes it is necessary to test if an error is thrown. Similar to the just featured operators there are operators for errors (those keywords are also passed to the expect parameter).
 _Those are:
  - ``e|`` (for allowing all errors)
  - ``e|EvalError``
@@ -180,7 +180,7 @@ test.htmlPage = "./test/fixtures/page.html";
 ```
 
 ### Server Port
-By default the server runs on port ``10000``. If the port is already in use the port number is raised by one if an open port was found. The initial port can be changed, if this is a bad starting point for any reason. Simply declare another port in that case.
+By default the server runs on port ``10000``. If the port is already in use the port number is raised by one until an open port was found. The initial port can be changed, if this is a bad starting point for any reason. Simply declare another port in that case.
 ```js
 test.port = 8080;
 ```

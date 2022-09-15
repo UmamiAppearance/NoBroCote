@@ -12,13 +12,15 @@
  * @see https://github.com/avajs/ava
  */
 
-import { blue, red, underline } from "colorette";
+import { blue, bold, red, underline } from "colorette";
 import { fork } from "child_process";
-import { readdir, readFile, stat } from "fs/promises";
+import { readdir, readFile, stat, writeFile } from "fs/promises";
 import { join as joinPath } from "path";
 import picomatch from "picomatch";
 import AbortablePromise from "promise-abortable";
+import { stdin as input, stdout as output } from "process";
 import { ImportManager } from "import-manager";
+import * as readline from "readline/promises";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { FailedError } from "./utils.js";
@@ -200,7 +202,7 @@ const isNBCFile = async filePath => {
     if (config.ignoreCoherence) {
         return true;
     }
-    const source = await readFile(filePath);
+    let source = await readFile(filePath);
     const importManager = new ImportManager(source.toString(), filePath);
 
     let statement;
@@ -214,7 +216,41 @@ const isNBCFile = async filePath => {
         return false;
     }
 
-    return (statement.members.count && statement.members.entities.at(0).name === "test");
+    const hasImport = statement.members.count && statement.members.entities.at(0).name === "test";
+
+    if (!hasImport) {
+        return false;
+    }
+
+    if ((/test\.init\(\)/).test(source)) {
+        return true;
+    }
+
+
+    const rl = readline.createInterface({ input, output });
+
+    console.warn(bold(`File: '${filePath}' has not '.init()' call.`));
+
+    const response = await rl.question("Should it be added to the file? [Y|n] ");
+    const add = !(/^[Nn].*/).test(response);
+    
+    if (!add) {
+        return false;
+    }
+
+    source += "\ntest.init();\n";
+
+    let fixedFile;
+    try {
+        await writeFile(filePath, source, "utf-8");
+        fixedFile = true;
+        console.log("");
+    } catch (err) {
+        console.error(err);
+        fixedFile = false;
+    }
+    
+    return fixedFile;
 };
 
 // file collecting function
@@ -305,6 +341,8 @@ const defaultRun = async (fileList, args) => {
         return 4;
         
     }
+
+    console.log("");
     return exitCodes.some(code => code !== 0)|0;
 };
 
@@ -333,6 +371,8 @@ const serialRun = async (fileList, args) => {
         
         if (argv.debug) {
             console.log(blue(`___\nCompleted Test File: '${testFile}'\n`));
+        } else {
+            console.log("");
         }
     }
 
@@ -346,5 +386,6 @@ const fileList = await collectFiles(CWD);
 const exitCode = argv.serial
     ? await serialRun(fileList, runnerArgs)
     : await defaultRun(fileList, runnerArgs);
+
 
 process.exit(exitCode);

@@ -1,7 +1,7 @@
 /*
  * [NoBroCote|HTML Server]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
@@ -9,7 +9,7 @@
 import { createServer } from "http";
 import puppeteer from "puppeteer";
 import { readFile } from "fs";
-import { bold, blue, gray, green, red } from "colorette";
+import { bold, blue, gray, green, red, yellow } from "colorette";
 import unpackValues from "./utils.js";
 
 /**
@@ -130,6 +130,7 @@ class NoBroCoteHTMLServer {
     async onConsole(msg) {
         let isInternal = false;
         let isError = false;
+        let msgType = msg.type();
 
         // Loops through all arguments of the log
         // analyzes the type.
@@ -211,10 +212,21 @@ class NoBroCoteHTMLServer {
             } else {
                 const iLen = 5;
                 const indent = " ".repeat(iLen);
-                const info = indent + "(" + this.group + ") log:";
-                const separator = gray(`\n${indent}${"-".repeat(info.length - iLen - 1)}\n`);
+                const info = `${indent}(${this.group}) ${msgType}:`;
+                
+                let color;
+                if (msgType === "warning") {
+                    color = yellow;
+                } else if (msgType === "error") {
+                    color = red;
+                } else {
+                    color = blue;
+                }
+
+                const separator = color(`\n${indent}${"-".repeat(info.length - iLen - 1)}\n`);
+                
                 const msg = [
-                    bold(blue(info)),
+                    bold(color(info)),
                     separator,
                     ...logList,
                     "\n"

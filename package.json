@@ -1,6 +1,6 @@
 {
   "name": "no-bro-cote",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Node Browser Code testing. Run unit tests on your JavaScript code for the browser.",
   "main": "./src/index.js",
   "bin": {

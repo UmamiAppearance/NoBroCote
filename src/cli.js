@@ -229,7 +229,7 @@ const isNBCFile = async filePath => {
 
     const rl = readline.createInterface({ input, output });
 
-    console.warn(bold(`File: '${filePath}' has not '.init()' call.`));
+    console.warn(bold(`File: '${filePath}' does not contain '.init()' call.`));
 
     const response = await rl.question("Should it be added to the file? [Y|n] ");
     const add = !(/^[Nn].*/).test(response);

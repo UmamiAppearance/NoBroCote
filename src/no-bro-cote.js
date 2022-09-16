@@ -1,7 +1,7 @@
 /**
  * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.2.3
+ * @version 0.2.4
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
@@ -212,8 +212,8 @@ class NoBroCote {
             if (err) {
 
                 // test if an error is expected
-                let expectErr = (/^e\|/).test(String(expect));
-                const errType = expect.replace(/^(e\|)/, "");
+                const expectErr = (/^e\|/).test(String(expect));
+                const errType = expectErr ? expect.replace(/^(e\|)/, "") : null;
 
                 // test if the error is generic or in the error list
                 if (expectErr &&

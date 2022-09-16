@@ -342,10 +342,10 @@ Arguments passed to the CLI will always take precedence over the CLI options con
 #### Options
 
 - `debug`: enables debug mode if set to true. Let's no-bro-cote run the tests serially and provides verbose console output
-- `extensions`: extensions of test files. Setting this overrides the default `["mjs", "js"]` value
+- `extensions`: extensions of test files. Setting this option overrides the default `["mjs", "js"]` value
 - `failFast`: stop running further tests once a test fails
 - `files`: an array of glob patterns to select test files. Files with an underscore prefix are ignored. By default only selects files with `mjs` & `js` extensions, even if the pattern matches other files. Specify `extensions` to allow other file extensions
-- `ignoreCoherence`: Every test file is getting executed as a subprocess. To prevent the CLI to run every js-file, that is found, the source code is getting analyzed if it is a no-bro-cote test file. Setting this option true true, disables this check (which might be dangerous).
+- `ignoreCoherence`: Every test file is getting executed as a subprocess. To prevent the CLI to run every js-file, that is found, the source code is getting analyzed if it is a no-bro-cote test file. Setting this option to true, disables this check (which might be dangerous).
 - `serial`: By default the tests are running concurrently. Setting this option to true, only one test file runs at a time. 
 
 

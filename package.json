@@ -1,6 +1,6 @@
 {
   "name": "no-bro-cote",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Node Browser Code testing. Run unit tests on your JavaScript code for the browser.",
   "main": "./src/index.js",
   "bin": {
@@ -43,15 +43,15 @@
   "homepage": "https://github.com/UmamiAppearance/NoBroCote#readme",
   "dependencies": {
     "colorette": "^2.0.19",
-    "import-manager": "^0.1.5",
+    "import-manager": "^0.1.6",
     "picomatch": "^2.3.1",
     "promise-abortable": "^1.2.6",
-    "puppeteer": "^19.4.0",
+    "puppeteer": "^19.4.1",
     "url-exist": "^3.0.1",
     "yargs": "^17.6.2"
   },
   "devDependencies": {
-    "eslint": "^8.29.0",
+    "eslint": "^8.30.0",
     "wade": "^0.3.3"
   }
 }

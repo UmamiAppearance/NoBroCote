@@ -1,7 +1,7 @@
 /**
  * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.2.8
+ * @version 0.2.9
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
@@ -191,6 +191,10 @@ class NoBroCote {
      */
     makeUnit(name, expect, fn, ...fnArgs) {
         
+        if (!name) {
+            throw new Error("Unit name must not be empty.");
+        }
+
         if (name in this.units) {
             throw new Error(`Unit ${name} already exists.`);
         }

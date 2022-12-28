@@ -112,7 +112,7 @@ if (argv.pattern) {
             
             // if the path contains no * and it is a directory
             // one * will get appended to convert it into a 
-            // valid minimatch patter
+            // valid minimatch pattern
             if (!pattern.includes("*")) {
                 let isDir = false;
                 try {

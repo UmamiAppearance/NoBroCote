@@ -1,8 +1,12 @@
 {
   "name": "no-bro-cote",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Node Browser Code testing. Run unit tests on your JavaScript code for the browser.",
   "main": "./src/index.js",
+  "module": "./src/index.js",
+  "exports": {
+    "import": "./src/index.js"
+  },
   "bin": {
     "no-bro-cote": "./src/cli.js"
   },

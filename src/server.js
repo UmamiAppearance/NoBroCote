@@ -235,7 +235,7 @@ class NoBroCoteHTMLServer {
 
     /**
      * Helper method which gets called whenever a page error happens.
-     * These are not errors inside of the test units but error, that
+     * These are not errors inside of the test units but errors, that
      * happen while processing the html page (and which are almost 
      * certainly inside of the code of the html page).
      * But to break it down this method is only there to prettify 
@@ -256,6 +256,11 @@ class NoBroCoteHTMLServer {
                 "\n"
             ];
             console.error(...msg);
+        }
+
+        // testing must stop if a page error occurs
+        if (!this.expectErrors) {
+            throw new Error("Stopped testing, due to a page error.");
         }
     }
 

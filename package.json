@@ -47,7 +47,7 @@
   "homepage": "https://github.com/UmamiAppearance/NoBroCote#readme",
   "dependencies": {
     "colorette": "^2.0.19",
-    "import-manager": "^0.2.1",
+    "import-manager": "^0.3.0",
     "picomatch": "^2.3.1",
     "promise-abortable": "^1.2.6",
     "puppeteer": "^19.5.2",

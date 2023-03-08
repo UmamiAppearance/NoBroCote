@@ -1,7 +1,7 @@
 /**
  * [NoBroCote]{@link https://github.com/UmamiAppearance/NoBroCote}
  *
- * @version 0.2.12
+ * @version 0.2.13
  * @author UmamiAppearance [mail@umamiappearance.eu]
  * @license GPL-3.0
  */
@@ -10,7 +10,7 @@
 /**
  * Main class. Instances of this class are hybrids
  * of prototypes for creating unit tests and are
- * also working as HTM test runners.
+ * also working as HTML test runners.
  */
 class NoBroCote {
 

@@ -280,7 +280,7 @@ class NoBroCoteHTMLServer {
         this.server.listen(this.port);
 
         if (this.debug) this.debugLog(0, "-", "running tests:");
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({headless: "new"});
         await browser.createIncognitoBrowserContext();
         
         const page = await browser.newPage();

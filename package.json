@@ -1,6 +1,6 @@
 {
   "name": "no-bro-cote",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "description": "Node Browser Code testing. Run unit tests on your JavaScript code for the browser.",
   "main": "./src/index.js",
   "module": "./src/index.js",
@@ -50,15 +50,12 @@
     "import-manager": "^0.4.4",
     "picomatch": "^2.3.1",
     "promise-abortable": "^1.2.6",
-    "puppeteer": "^20.7.4",
+    "puppeteer": "^20.8.2",
     "url-exist": "^3.0.1",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "eslint": "^8.44.0",
+    "eslint": "^8.45.0",
     "wade": "^0.3.3"
-  },
-  "overrides": {
-    "optionator" : "0.9.3"
   }
 }
